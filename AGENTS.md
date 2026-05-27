@@ -1,0 +1,62 @@
+# AGENTS.md — Proofolio 작업 규칙
+
+이 파일은 이 레포에서 작업하는 모든 코딩 에이전트(Codex 등)가 **매 작업 전에 반드시 읽고 따르는** 규칙이다.
+
+## 0. 프로젝트 한 줄
+Proofolio — 검증된 발급기관이 경력·수료·프로젝트·수상 **증명서를 온체인으로 발급**하고, 검증자가 QR/링크로 **진위를 검증**하는 블록체인 dApp (Ethereum Sepolia).
+
+## 1. 단일 진실 소스 (Single Source of Truth)
+- **`docs/PRD-SRS-구현계획.md`** 가 이 프로젝트의 기준 문서다. 작업 전 반드시 통독한다.
+- 특히 다음을 준수: **3장 SRS**(FR/SC/데이터/NFR/BR/오류/수용기준), **8장 구현계획(Phase)**, **11.3 보안 감사 체크리스트**, **1.4 신뢰 모델**.
+- 코드와 문서가 충돌하면 문서가 우선이다. 구현 중 스펙을 바꿔야 하면 **먼저 문서를 갱신**하고 그 변경을 보고한다.
+
+## 2. 작업 방식 (반드시 지킬 것)
+- **한 번에 한 Phase만** 구현한다. 지시받은 Phase를 끝내면 **멈추고** 결과를 보고한다. 다음 Phase로 자동 진행하지 않는다.
+- 스펙에 명시되지 않은 **큰 결정(라이브러리 선택, 데이터 모델, 권한 구조 등)은 임의로 하지 말고 질문**한다.
+- 각 Phase는 구현 → 자체 점검 → 검증 → 커밋 순으로 마무리한다.
+- 이전 Phase의 동작을 깨지 않는다(회귀 확인).
+
+## 3. 기술 스택 & 컨벤션
+- 컨트랙트: Solidity `^0.8.x`, OpenZeppelin(`ERC721`, `Ownable2Step`), Hardhat, ethers v6.
+- 프론트: React 19 + TypeScript + Vite + **Tailwind CSS** + ethers v6 + MetaMask.
+- 배포: 컨트랙트 = Hardhat + Sepolia / 웹 = Cloudflare Pages(wrangler).
+- 환경변수: 공개값만 `VITE_*`(예: `VITE_SEPOLIA_RPC_URL`, `VITE_CONTRACT_ADDRESS`). **`PRIVATE_KEY` 등 비밀은 절대 프론트/`VITE_*`/커밋에 넣지 않는다.** `.env`는 커밋 금지, `.env.example`만 커밋.
+- 타입 안전(any 남발 금지), 단일 책임 컴포넌트, 디자인 토큰/공통 컴포넌트 재사용.
+
+## 4. 보안 규칙 (컨트랙트 — 위반 금지)
+- **소울바운드**: `_update` 오버라이드에서 **민팅(`from == address(0)`)만 허용**, 보유자 간 전송은 revert. ⚠️ mint 경로까지 막지 말 것.
+- 발급은 `_safeMint`가 아니라 **`_mint`** 사용(임의 holder 컨트랙트의 `onERC721Received` 재진입/그리핑 방지).
+- **취소(revoke)는 그 증명서를 발급한 기관만** 가능. 관리자는 임의 증명서를 직접 취소하지 않고 `setIssuerActive`로 발급기관을 비활성화한다.
+- 소유권은 **`Ownable2Step`**.
+- 입력 검증: 주소 `!= address(0)`, `dataHash != 0`, 이름/종류 비어있지 않음, 중복 등록·중복 취소·미존재 tokenId 차단.
+- **온체인에 개인식별정보(PII) 저장 금지** — `credType`/`metaURI`에 이름·이메일·학번 등 금지(해시·일반 종류만).
+- 상태변경 함수에 **무제한 루프 금지**(`holder => tokenIds` 매핑 + 프론트 이벤트 인덱싱으로 목록 처리).
+- checks-effects-interactions 준수.
+
+## 5. 프론트 구현 규칙
+- **검증/조회는 읽기 전용 RPC(`VITE_SEPOLIA_RPC_URL`)로 지갑 없이 동작**시키고, 쓰기(MetaMask Signer)와 Provider를 분리한다.
+- 공유 링크 `/verify/{tokenId}` 직접 진입이 404 안 나도록 **SPA 라우팅 fallback**(`_redirects` 또는 `200.html`)을 둔다.
+- 파일 해시는 클라이언트에서 `ethers.keccak256(new Uint8Array(await file.arrayBuffer()))`로 계산하고, 원본 파일은 업로드/온체인 저장하지 않는다.
+- 모든 트랜잭션은 상태 토스트(서명 대기→전송→확정)와 Etherscan 링크를 제공한다.
+- 잘못된 네트워크/미연결/거부/빈 상태/에러 상태를 항상 처리한다.
+
+## 6. 완료 기준 (Phase 종료 시 확인)
+- `npx hardhat compile` 성공, 해당 Phase 관련 `npx hardhat test` 통과.
+- `npm run dev`로 앱이 정상 렌더, 콘솔 에러 0.
+- 해당 Phase의 문서상 "완료 조건/산출물"을 충족.
+- 결과(무엇을 했고, 어떻게 확인했는지)를 한 단락으로 보고.
+
+## 7. 커밋 규칙
+- Phase 단위로 커밋. 메시지 형식: `feat: pN <요약>` (예: `feat: p2 issuer registry + credential issuance`).
+- 커밋 본문에 그 Phase의 1줄 회고를 남긴다(바이브코딩 자료).
+- **커밋 메시지에 `Co-Authored-By` 등 공동 작성자 트레일러를 추가하지 않는다.**
+- 비밀키/`.env`/빌드 산출물은 커밋하지 않는다(`.gitignore` 확인).
+
+## 8. 검토가 필요한 지점 (사람이 확인)
+- **P2~P3 컨트랙트(발급/소울바운드/취소/권한)는 Sepolia 배포 전에 사람이 보안 리뷰**한다. 임의로 메인넷/프로덕션 배포하지 않는다.
+- 디자인/UX 최종 폴리시는 별도 검토 단계에서 진행한다.
+
+## 9. 하지 말 것
+- 스펙에 없는 기능 임의 추가, 권한 모델 변경, 라이브러리 임의 교체.
+- 여러 Phase를 한 번에 몰아서 구현.
+- 비밀값 노출, PII 온체인 저장, push 송금 패턴 도입.
