@@ -278,4 +278,31 @@ describe("Proofolio", function () {
       .to.be.revertedWithCustomError(proofolio, "CredentialNotFound")
       .withArgs(999n);
   });
+
+  it("returns on-chain base64 JSON metadata via tokenURI", async function () {
+    const { proofolio, tokenId } = await registerIssuerAndIssueCredential();
+
+    const uri = await proofolio.tokenURI(tokenId);
+    expect(uri.startsWith("data:application/json;base64,")).to.equal(true);
+
+    const json = JSON.parse(
+      Buffer.from(uri.split(",")[1], "base64").toString("utf8"),
+    );
+    expect(json.name).to.contain("Proofolio Credential #1");
+    expect(json.image.startsWith("data:image/svg+xml;base64,")).to.equal(true);
+
+    const attrs = json.attributes as Array<{ trait_type: string; value: string }>;
+    expect(attrs.find((a) => a.trait_type === "Type")?.value).to.equal(
+      credentialType,
+    );
+    expect(attrs.find((a) => a.trait_type === "Status")?.value).to.equal("VALID");
+  });
+
+  it("reverts tokenURI for missing credentials", async function () {
+    const { proofolio } = await deployProofolio();
+
+    await expect(proofolio.tokenURI(999n))
+      .to.be.revertedWithCustomError(proofolio, "CredentialNotFound")
+      .withArgs(999n);
+  });
 });
