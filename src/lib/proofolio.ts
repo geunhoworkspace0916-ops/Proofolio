@@ -1,9 +1,11 @@
 import {
   BrowserProvider,
   Contract,
+  Interface,
   EventLog,
   JsonRpcProvider,
   type ContractTransactionResponse,
+  type ContractTransactionReceipt,
   type ContractRunner,
   type Log,
   type Signer,
@@ -70,6 +72,7 @@ type VerificationTuple = readonly [
 };
 
 let cachedReadProvider: JsonRpcProvider | null = null;
+const proofolioInterface = new Interface(proofolioContractConfig.abi);
 
 function isEventLog(log: EventLog | Log): log is EventLog {
   return "args" in log;
@@ -270,4 +273,47 @@ export async function setIssuerActive(
     normalizeAddress(issuer),
     active,
   ) as Promise<ContractTransactionResponse>;
+}
+
+export async function issueCredential(
+  holder: string,
+  dataHash: string,
+  credType: string,
+  metaURI: string,
+): Promise<ContractTransactionResponse> {
+  return (await getMetaMaskProofolioContract()).issueCredential(
+    normalizeAddress(holder),
+    dataHash,
+    credType,
+    metaURI,
+  ) as Promise<ContractTransactionResponse>;
+}
+
+export function getIssuedCredentialTokenId(
+  receipt: ContractTransactionReceipt | null,
+) {
+  if (!receipt) {
+    return null;
+  }
+
+  for (const log of receipt.logs) {
+    if (isEventLog(log) && log.fragment.name === "CredentialIssued") {
+      return log.args.tokenId as bigint;
+    }
+
+    try {
+      const parsed = proofolioInterface.parseLog({
+        data: log.data,
+        topics: log.topics,
+      });
+
+      if (parsed?.name === "CredentialIssued") {
+        return parsed.args.tokenId as bigint;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
 }

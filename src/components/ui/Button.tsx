@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "warning" | "ghost";
 type ButtonSize = "sm" | "md";
@@ -17,6 +17,23 @@ const sizeClassNames: Record<ButtonSize, string> = {
   md: "min-h-11 px-4 text-sm",
 };
 
+function buttonClassName({
+  className = "",
+  size,
+  variant,
+}: {
+  className?: string;
+  size: ButtonSize;
+  variant: ButtonVariant;
+}) {
+  return [
+    "inline-flex items-center justify-center gap-2 rounded-md font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60",
+    variantClassNames[variant],
+    sizeClassNames[size],
+    className,
+  ].join(" ");
+}
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -33,15 +50,32 @@ export function Button({
   return (
     <button
       type={type}
-      className={[
-        "inline-flex items-center justify-center gap-2 rounded-md font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60",
-        variantClassNames[variant],
-        sizeClassNames[size],
-        className,
-      ].join(" ")}
+      className={buttonClassName({ className, size, variant })}
       {...props}
     >
       {children}
     </button>
+  );
+}
+
+type ButtonLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+};
+
+export function ButtonLink({
+  children,
+  className = "",
+  size = "md",
+  variant = "primary",
+  ...props
+}: ButtonLinkProps) {
+  return (
+    <a
+      className={buttonClassName({ className, size, variant })}
+      {...props}
+    >
+      {children}
+    </a>
   );
 }

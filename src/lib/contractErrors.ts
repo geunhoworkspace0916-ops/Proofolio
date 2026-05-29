@@ -9,6 +9,15 @@ export function getContractErrorName(error: unknown) {
 }
 
 export function toUserFacingError(error: unknown) {
+  const maybeError = error as {
+    code?: number;
+    info?: { error?: { code?: number }; errorName?: string };
+  };
+
+  if (maybeError.code === 4001 || maybeError.info?.error?.code === 4001) {
+    return "MetaMask 서명이 거절되었습니다.";
+  }
+
   const errorName = getContractErrorName(error);
 
   if (errorName === "IssuerAlreadyRegistered") {
@@ -22,6 +31,18 @@ export function toUserFacingError(error: unknown) {
   }
   if (errorName === "IssuerNameRequired") {
     return "기관 이름을 입력해주세요.";
+  }
+  if (errorName === "IssuerNotRegistered" || errorName === "IssuerNotActive") {
+    return "등록된 활성 발급기관만 실행할 수 있습니다.";
+  }
+  if (errorName === "HolderRequired") {
+    return "보유자 주소를 확인해주세요.";
+  }
+  if (errorName === "DataHashRequired") {
+    return "원본 파일 해시를 확인해주세요.";
+  }
+  if (errorName === "CredentialTypeRequired") {
+    return "증명서 종류를 선택해주세요.";
   }
   if (error instanceof Error) {
     return error.message;

@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { appEnv } from "../../config/env";
+import { getEtherscanTxUrl } from "../../lib/etherscan";
 import { Button } from "./Button";
 
 export type TransactionToastStatus =
@@ -21,10 +21,6 @@ const statusLabel: Record<TransactionToastStatus, string> = {
   confirmed: "확정됨",
   failed: "실패",
 };
-
-function txUrl(hash: string) {
-  return `${appEnv.etherscanBaseUrl.replace(/\/$/, "")}/tx/${hash}`;
-}
 
 type TransactionToastProps = {
   toast: TransactionToastState | null;
@@ -49,7 +45,7 @@ export function TransactionToast({ onDismiss, toast }: TransactionToastProps) {
           ) : null}
           {toast.hash ? (
             <a
-              href={txUrl(toast.hash)}
+              href={getEtherscanTxUrl(toast.hash)}
               target="_blank"
               rel="noreferrer"
               className="mt-3 inline-flex text-sm font-semibold text-trust-600 hover:text-trust-500"
