@@ -1,8 +1,11 @@
 import {
   BrowserProvider,
   Contract,
+  EventLog,
   JsonRpcProvider,
+  type ContractTransactionResponse,
   type ContractRunner,
+  type Log,
   type Signer,
 } from "ethers";
 import { appEnv } from "../config/env";
@@ -34,6 +37,11 @@ export type WalletRoles = {
   isIssuer: boolean;
 };
 
+export type IssuerSummary = IssuerRecord & {
+  address: string;
+  issuedCount: number;
+};
+
 type IssuerTuple = readonly [string, string, boolean, bigint] & {
   name: string;
   metaURI: string;
@@ -62,6 +70,10 @@ type VerificationTuple = readonly [
 };
 
 let cachedReadProvider: JsonRpcProvider | null = null;
+
+function isEventLog(log: EventLog | Log): log is EventLog {
+  return "args" in log;
+}
 
 export function canReadProofolio() {
   return (
@@ -110,6 +122,18 @@ export function getReadProofolioContract() {
 
 export function getWriteProofolioContract(signer: Signer) {
   return getProofolioContract(signer);
+}
+
+export async function getMetaMaskSigner() {
+  if (!window.ethereum) {
+    throw new Error("MetaMask 지갑을 찾을 수 없습니다.");
+  }
+
+  return getBrowserProvider(window.ethereum).getSigner();
+}
+
+export async function getMetaMaskProofolioContract() {
+  return getWriteProofolioContract(await getMetaMaskSigner());
 }
 
 export async function readOwner() {
@@ -174,4 +198,76 @@ export async function readCredentialIds(holder: string) {
   return (await getReadProofolioContract().credentialsOf(
     normalizeAddress(holder),
   )) as bigint[];
+}
+
+export async function readIssuerSummaries(): Promise<IssuerSummary[]> {
+  const contract = getReadProofolioContract();
+  const [registeredLogs, issuedLogs] = await Promise.all([
+    contract.queryFilter(contract.filters.IssuerRegistered(), 0, "latest"),
+    contract.queryFilter(contract.filters.CredentialIssued(), 0, "latest"),
+  ]);
+
+  const issuerAddresses = new Map<string, string>();
+
+  for (const log of registeredLogs) {
+    if (!isEventLog(log)) {
+      continue;
+    }
+
+    const issuer = normalizeAddress(log.args.issuer as string);
+    issuerAddresses.set(issuer, issuer);
+  }
+
+  const issuedCounts = new Map<string, number>();
+
+  for (const log of issuedLogs) {
+    if (!isEventLog(log)) {
+      continue;
+    }
+
+    const issuer = normalizeAddress(log.args.issuer as string);
+    issuedCounts.set(issuer, (issuedCounts.get(issuer) ?? 0) + 1);
+  }
+
+  const summaries = await Promise.all(
+    [...issuerAddresses.values()].map(async (address) => {
+      const issuer = await readIssuer(address);
+
+      return {
+        ...issuer,
+        address,
+        issuedCount: issuedCounts.get(address) ?? 0,
+      };
+    }),
+  );
+
+  return summaries.sort((left, right) => {
+    if (left.registeredAt === right.registeredAt) {
+      return left.address.localeCompare(right.address);
+    }
+
+    return left.registeredAt < right.registeredAt ? 1 : -1;
+  });
+}
+
+export async function registerIssuer(
+  issuer: string,
+  name: string,
+  metaURI: string,
+): Promise<ContractTransactionResponse> {
+  return (await getMetaMaskProofolioContract()).registerIssuer(
+    normalizeAddress(issuer),
+    name,
+    metaURI,
+  ) as Promise<ContractTransactionResponse>;
+}
+
+export async function setIssuerActive(
+  issuer: string,
+  active: boolean,
+): Promise<ContractTransactionResponse> {
+  return (await getMetaMaskProofolioContract()).setIssuerActive(
+    normalizeAddress(issuer),
+    active,
+  ) as Promise<ContractTransactionResponse>;
 }
