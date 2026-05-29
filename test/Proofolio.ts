@@ -10,11 +10,32 @@ async function deployProofolio() {
   return { proofolio, owner, issuer, holder, other };
 }
 
-describe("Proofolio Phase 2", function () {
+describe("Proofolio", function () {
   const issuerName = "Code School";
   const issuerMetaURI = "https://codeschool.example/profile";
   const credentialMetaURI = "ipfs://credential-metadata";
   const credentialType = "Completion";
+
+  async function registerIssuerAndIssueCredential() {
+    const context = await deployProofolio();
+    const dataHash = ethers.id("credential-file-v1");
+
+    await context.proofolio.registerIssuer(
+      context.issuer.address,
+      issuerName,
+      issuerMetaURI,
+    );
+    await context.proofolio
+      .connect(context.issuer)
+      .issueCredential(
+        context.holder.address,
+        dataHash,
+        credentialType,
+        credentialMetaURI,
+      );
+
+    return { ...context, dataHash, tokenId: 1n };
+  }
 
   it("registers an issuer by the owner", async function () {
     const { proofolio, issuer } = await deployProofolio();
@@ -165,5 +186,96 @@ describe("Proofolio Phase 2", function () {
     await expect(
       proofolio.connect(issuer).issueCredential(holder.address, dataHash, "", ""),
     ).to.be.revertedWithCustomError(proofolio, "CredentialTypeRequired");
+  });
+
+  it("lets the issuing institution revoke its credential", async function () {
+    const { proofolio, issuer, tokenId } =
+      await registerIssuerAndIssueCredential();
+
+    await expect(proofolio.connect(issuer).revokeCredential(tokenId))
+      .to.emit(proofolio, "CredentialRevoked")
+      .withArgs(tokenId, issuer.address);
+
+    const credential = await proofolio.credentials(tokenId);
+    expect(credential.revoked).to.equal(true);
+    expect(await proofolio.isValid(tokenId)).to.equal(false);
+  });
+
+  it("rejects revocation by accounts that did not issue the credential", async function () {
+    const { proofolio, owner, other, tokenId } =
+      await registerIssuerAndIssueCredential();
+
+    await proofolio.registerIssuer(other.address, "Other Issuer", "");
+
+    await expect(proofolio.connect(other).revokeCredential(tokenId))
+      .to.be.revertedWithCustomError(proofolio, "NotCredentialIssuer")
+      .withArgs(other.address, tokenId);
+
+    await expect(proofolio.connect(owner).revokeCredential(tokenId))
+      .to.be.revertedWithCustomError(proofolio, "NotCredentialIssuer")
+      .withArgs(owner.address, tokenId);
+  });
+
+  it("rejects revocation for missing and already revoked credentials", async function () {
+    const { proofolio, issuer, tokenId } =
+      await registerIssuerAndIssueCredential();
+
+    await expect(proofolio.connect(issuer).revokeCredential(999n))
+      .to.be.revertedWithCustomError(proofolio, "CredentialNotFound")
+      .withArgs(999n);
+
+    await proofolio.connect(issuer).revokeCredential(tokenId);
+
+    await expect(proofolio.connect(issuer).revokeCredential(tokenId))
+      .to.be.revertedWithCustomError(proofolio, "CredentialAlreadyRevoked")
+      .withArgs(tokenId);
+  });
+
+  it("rejects holder-to-holder transfers as soulbound", async function () {
+    const { proofolio, holder, other, tokenId } =
+      await registerIssuerAndIssueCredential();
+
+    await expect(
+      proofolio
+        .connect(holder)
+        .transferFrom(holder.address, other.address, tokenId),
+    ).to.be.revertedWithCustomError(proofolio, "SoulboundTransferDisabled");
+
+    expect(await proofolio.ownerOf(tokenId)).to.equal(holder.address);
+  });
+
+  it("returns accurate verification views and holder token lists", async function () {
+    const { proofolio, issuer, holder, dataHash, tokenId } =
+      await registerIssuerAndIssueCredential();
+
+    const verification = await proofolio.verify(tokenId);
+    expect(verification.issuer).to.equal(issuer.address);
+    expect(verification.issuerName).to.equal(issuerName);
+    expect(verification.issuerActive).to.equal(true);
+    expect(verification.holder).to.equal(holder.address);
+    expect(verification.dataHash).to.equal(dataHash);
+    expect(verification.credType).to.equal(credentialType);
+    expect(verification.issuedAt).to.be.greaterThan(0n);
+    expect(verification.revoked).to.equal(false);
+
+    expect(await proofolio.credentialsOf(holder.address)).to.deep.equal([
+      tokenId,
+    ]);
+    expect(await proofolio.isValid(tokenId)).to.equal(true);
+    expect(await proofolio.isValid(999n)).to.equal(false);
+
+    await proofolio.setIssuerActive(issuer.address, false);
+
+    const inactiveVerification = await proofolio.verify(tokenId);
+    expect(inactiveVerification.issuerActive).to.equal(false);
+    expect(await proofolio.isValid(tokenId)).to.equal(false);
+  });
+
+  it("rejects verification of missing credentials", async function () {
+    const { proofolio } = await deployProofolio();
+
+    await expect(proofolio.verify(999n))
+      .to.be.revertedWithCustomError(proofolio, "CredentialNotFound")
+      .withArgs(999n);
   });
 });

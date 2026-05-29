@@ -7,7 +7,6 @@ import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /// @title Proofolio
 /// @notice Issuer registry and credential issuance contract for Proofolio.
-/// @dev Phase 2 intentionally excludes revocation, verification views, and soulbound transfer blocking.
 contract Proofolio is ERC721, Ownable2Step {
     struct Issuer {
         string name;
@@ -34,6 +33,10 @@ contract Proofolio is ERC721, Ownable2Step {
     error HolderRequired();
     error DataHashRequired();
     error CredentialTypeRequired();
+    error CredentialNotFound(uint256 tokenId);
+    error NotCredentialIssuer(address caller, uint256 tokenId);
+    error CredentialAlreadyRevoked(uint256 tokenId);
+    error SoulboundTransferDisabled();
 
     event IssuerRegistered(address indexed issuer, string name);
     event IssuerStatusChanged(address indexed issuer, bool active);
@@ -44,6 +47,7 @@ contract Proofolio is ERC721, Ownable2Step {
         bytes32 dataHash,
         string credType
     );
+    event CredentialRevoked(uint256 indexed tokenId, address indexed issuer);
 
     mapping(address issuer => Issuer) public issuers;
     address[] public issuerList;
@@ -139,6 +143,91 @@ contract Proofolio is ERC721, Ownable2Step {
         _mint(holder, tokenId);
 
         emit CredentialIssued(tokenId, msg.sender, holder, dataHash, credType);
+    }
+
+    function revokeCredential(uint256 tokenId) external {
+        Credential storage credential = _credentialOrRevert(tokenId);
+
+        if (credential.issuer != msg.sender) {
+            revert NotCredentialIssuer(msg.sender, tokenId);
+        }
+        if (credential.revoked) {
+            revert CredentialAlreadyRevoked(tokenId);
+        }
+
+        credential.revoked = true;
+
+        emit CredentialRevoked(tokenId, msg.sender);
+    }
+
+    function verify(
+        uint256 tokenId
+    )
+        external
+        view
+        returns (
+            address issuer,
+            string memory issuerName,
+            bool issuerActive,
+            address holder,
+            bytes32 dataHash,
+            string memory credType,
+            uint256 issuedAt,
+            bool revoked
+        )
+    {
+        Credential storage credential = _credentialOrRevert(tokenId);
+        Issuer storage issuerData = issuers[credential.issuer];
+
+        return (
+            credential.issuer,
+            issuerData.name,
+            issuerData.active,
+            credential.holder,
+            credential.dataHash,
+            credential.credType,
+            credential.issuedAt,
+            credential.revoked
+        );
+    }
+
+    function credentialsOf(address holder) external view returns (uint256[] memory) {
+        return holderTokenIds[holder];
+    }
+
+    function isValid(uint256 tokenId) external view returns (bool) {
+        if (!_credentialExists(tokenId)) {
+            return false;
+        }
+
+        Credential storage credential = credentials[tokenId];
+        return !credential.revoked && issuers[credential.issuer].active;
+    }
+
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    ) internal override returns (address from) {
+        from = super._update(to, tokenId, auth);
+
+        if (from != address(0)) {
+            revert SoulboundTransferDisabled();
+        }
+    }
+
+    function _credentialOrRevert(
+        uint256 tokenId
+    ) private view returns (Credential storage credential) {
+        if (!_credentialExists(tokenId)) {
+            revert CredentialNotFound(tokenId);
+        }
+
+        return credentials[tokenId];
+    }
+
+    function _credentialExists(uint256 tokenId) private view returns (bool) {
+        return credentials[tokenId].issuer != address(0);
     }
 
     function _isRegisteredIssuer(address issuer) private view returns (bool) {
