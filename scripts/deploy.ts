@@ -1,17 +1,16 @@
-import "@nomicfoundation/hardhat-ethers";
-import hre from "hardhat";
-import { Proofolio__factory } from "../typechain-types";
+import { ethers, network } from "hardhat";
 
 async function main() {
-  const [deployer] = await hre.ethers.getSigners();
+  const [deployer] = await ethers.getSigners();
   const deployerAddress = await deployer.getAddress();
-  const balance = await hre.ethers.provider.getBalance(deployerAddress);
+  const balance = await ethers.provider.getBalance(deployerAddress);
 
-  console.log(`Network: ${hre.network.name}`);
+  console.log(`Network: ${network.name}`);
   console.log(`Deployer: ${deployerAddress}`);
-  console.log(`Balance: ${hre.ethers.formatEther(balance)} ETH`);
+  console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
 
-  const proofolio = await new Proofolio__factory(deployer).deploy();
+  const Proofolio = await ethers.getContractFactory("Proofolio");
+  const proofolio = await Proofolio.deploy();
   await proofolio.waitForDeployment();
 
   const address = await proofolio.getAddress();
