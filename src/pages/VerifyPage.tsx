@@ -1,11 +1,21 @@
 import { FormEvent, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight, ShieldCheck } from "lucide-react";
+import { shortenAddress } from "../lib/address";
+import { useCredentialVerification } from "../hooks/useCredentialVerification";
+
+function formatIssuedAt(value: bigint) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(Number(value) * 1000));
+}
 
 export function VerifyPage() {
   const navigate = useNavigate();
   const { tokenId } = useParams();
   const [query, setQuery] = useState("");
+  const verification = useCredentialVerification(tokenId);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,19 +65,80 @@ export function VerifyPage() {
         </form>
       ) : (
         <div className="rounded-lg border border-ink-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-md bg-paper-100 text-trust-600">
-              <ShieldCheck aria-hidden="true" size={24} />
-            </span>
-            <div>
-              <h2 className="font-semibold text-ink-950">
-                컨트랙트 조회 준비
-              </h2>
-              <p className="mt-1 text-sm text-ink-500">
-                읽기 전용 RPC와 ABI 연결 대기
-              </p>
+          {verification.status === "loading" ? (
+            <div className="text-sm font-medium text-ink-500">
+              읽기 전용 RPC로 조회 중
             </div>
-          </div>
+          ) : null}
+
+          {verification.status === "error" ? (
+            <div className="text-sm font-medium text-warn-600">
+              {verification.error}
+            </div>
+          ) : null}
+
+          {verification.status === "success" ? (
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <span className="grid size-12 place-items-center rounded-md bg-paper-100 text-trust-600">
+                  <ShieldCheck aria-hidden="true" size={24} />
+                </span>
+                <div>
+                  <h2 className="font-semibold text-ink-950">
+                    {verification.isValid ? "유효한 증명서" : "주의가 필요한 증명서"}
+                  </h2>
+                  <p className="mt-1 text-sm text-ink-500">
+                    지갑 없이 Sepolia 읽기 전용 RPC로 조회됨
+                  </p>
+                </div>
+              </div>
+
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-ink-500">종류</dt>
+                  <dd className="mt-1 font-medium text-ink-950">
+                    {verification.data.credType}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-500">발급일</dt>
+                  <dd className="mt-1 font-medium text-ink-950">
+                    {formatIssuedAt(verification.data.issuedAt)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-500">발급기관</dt>
+                  <dd className="mt-1 font-medium text-ink-950">
+                    {verification.data.issuerName || "이름 없음"}
+                    {verification.data.issuerActive ? " · Active" : " · Inactive"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-500">발급기관 주소</dt>
+                  <dd className="mt-1 font-medium text-ink-950">
+                    {shortenAddress(verification.data.issuer)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-500">보유자</dt>
+                  <dd className="mt-1 font-medium text-ink-950">
+                    {shortenAddress(verification.data.holder)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-ink-500">상태</dt>
+                  <dd className="mt-1 font-medium text-ink-950">
+                    {verification.data.revoked ? "취소됨" : "취소되지 않음"}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="rounded-md bg-paper-50 p-3 text-xs text-ink-500">
+                <div className="font-semibold text-ink-700">dataHash</div>
+                <div className="mt-1 break-all">{verification.data.dataHash}</div>
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </section>

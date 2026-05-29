@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, BadgeCheck, Building2, FileKey2 } from "lucide-react";
 import { hasContractConfig, hasReadProviderConfig } from "../config/env";
+import { useWallet } from "../wallet/useWallet";
 
 const roleLinks = [
   {
@@ -26,6 +27,7 @@ const roleLinks = [
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { isAdmin, isIssuer, shortAddress } = useWallet();
   const [query, setQuery] = useState("");
 
   function handleVerify(event: FormEvent<HTMLFormElement>) {
@@ -97,6 +99,18 @@ export function HomePage() {
               <dt className="text-ink-500">컨트랙트 주소</dt>
               <dd className="font-medium text-ink-900">
                 {hasContractConfig ? "설정됨" : "미설정"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-ink-500">지갑</dt>
+              <dd className="font-medium text-ink-900">
+                {shortAddress ?? "미연결"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-ink-500">역할</dt>
+              <dd className="font-medium text-ink-900">
+                {isAdmin ? "Admin" : isIssuer ? "Issuer" : "일반/미확인"}
               </dd>
             </div>
           </dl>
