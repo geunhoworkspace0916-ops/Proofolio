@@ -58,7 +58,7 @@ export function Header() {
               className={({ isActive }) =>
                 [
                   "rounded-lg px-3 py-1.5 transition hover:bg-paper-100 hover:text-ink-950",
-                  isActive ? "bg-paper-100 text-ink-950 shadow-[0_1px_2px_rgba(28,22,18,0.04)]" : "",
+                  isActive ? "bg-paper-100 text-ink-950 shadow-[0_1px_2px_rgba(11,18,32,0.04)]" : "",
                 ].join(" ")
               }
             >
@@ -94,7 +94,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => void connectWallet()}
-              className="inline-flex items-center gap-1.5 rounded-full bg-trust-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-[0_1px_2px_rgba(28,22,18,0.08)] transition hover:bg-trust-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-full bg-trust-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-[0_1px_2px_rgba(11,18,32,0.08)] transition hover:bg-trust-500 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={status === "connecting"}
               title={
                 hasMetaMask

@@ -72,7 +72,12 @@ function Hero({
 }) {
   return (
     <section className="space-y-6">
-      <h1 className="max-w-3xl text-[36px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink-950 sm:text-[44px]">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-trust-600/30 bg-trust-600/8 px-3 py-1 text-xs font-medium text-trust-600">
+        <span className="size-1.5 rounded-full bg-trust-600" aria-hidden />
+        Verifiable Credentials · Ethereum Sepolia
+      </span>
+
+      <h1 className="max-w-3xl text-[36px] font-semibold leading-[1.1] tracking-[-0.025em] text-ink-950 sm:text-[48px]">
         검증 가능한 디지털 증명서.
       </h1>
 
@@ -82,7 +87,7 @@ function Hero({
       </p>
 
       <form onSubmit={onVerify} className="max-w-xl">
-        <div className="flex items-center gap-2 rounded-2xl border border-ink-100 bg-paper-100 p-2 pl-4 shadow-[0_1px_2px_rgba(28,22,18,0.04)] focus-within:border-trust-600/40 focus-within:shadow-[0_4px_18px_-8px_rgba(180,83,9,0.25)]">
+        <div className="flex items-center gap-2 rounded-2xl border border-ink-100 bg-paper-100 p-2 pl-4 shadow-[0_1px_2px_rgba(11,18,32,0.04)] focus-within:border-trust-600/40 focus-within:shadow-[0_4px_22px_-10px_rgba(5,150,105,0.35)]">
           <input
             id="credential-query"
             value={query}
@@ -92,7 +97,7 @@ function Hero({
           />
           <button
             type="submit"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-trust-600 px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(28,22,18,0.08)] transition hover:bg-trust-500"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-trust-600 px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(11,18,32,0.08)] transition hover:bg-trust-500"
           >
             검증
             <ArrowRight aria-hidden="true" size={15} strokeWidth={2} />
@@ -118,7 +123,7 @@ function RoleGrid() {
             <Link
               key={item.to}
               to={item.to}
-              className="group rounded-2xl border border-ink-100 bg-paper-100 p-5 shadow-[0_1px_2px_rgba(28,22,18,0.04)] transition hover:-translate-y-0.5 hover:border-trust-600/30 hover:shadow-[0_8px_24px_-12px_rgba(180,83,9,0.18)]"
+              className="group rounded-2xl border border-ink-100 bg-paper-100 p-5 shadow-[0_1px_2px_rgba(11,18,32,0.04)] transition hover:-translate-y-0.5 hover:border-trust-600/30 hover:shadow-[0_10px_28px_-14px_rgba(5,150,105,0.25)]"
             >
               <span className="inline-flex size-9 items-center justify-center rounded-xl bg-trust-600/10 text-trust-600">
                 <Icon aria-hidden="true" size={18} strokeWidth={1.75} />
@@ -179,7 +184,7 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-ink-100 bg-paper-100 px-4 py-3 shadow-[0_1px_2px_rgba(28,22,18,0.04)]">
+    <div className="rounded-xl border border-ink-100 bg-paper-100 px-4 py-3 shadow-[0_1px_2px_rgba(11,18,32,0.04)]">
       <dt className="flex items-center gap-1.5 text-xs text-ink-500">
         {ok !== undefined ? (
           <span

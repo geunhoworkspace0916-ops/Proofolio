@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────
- * Proofolio — warm paper light
+ * Proofolio — soft cool light + emerald
  *
  * 톤
- *   따뜻한 크림 페이퍼 위에 깊은 갈색-블랙 텍스트.
- *   액센트는 절제된 앰버(amber-700) — 따뜻함 + 신뢰.
- *   카드는 흰 카드 + 미세한 갈색 그림자로 종이 위 카드 느낌.
+ *   부드러운 쿨 그레이 페이지 위에 흰 카드, 깊은 잉크 텍스트.
+ *   액센트는 에메랄드(emerald-600) — "verified" 의미와 결을 맞춤.
+ *   카드는 헤어라인 보더 + 종이 한 장 들린 듯한 그림자.
  * 원칙
- *   1. 가독성 최우선 (충분한 본문 크기, 차분한 line-height).
- *   2. 무채색 X — 모든 회색에 미세한 갈색 토닝.
- *   3. 카드와 호흡 — 부드러운 라운드, 종이 같은 그림자.
- *   4. 액센트는 CTA·링크·상태 뱃지에만 절제해서 사용.
+ *   1. 가독성 우선 (본문 15px, 충분한 line-height).
+ *   2. 무광택 — 그래디언트/글로우 금지.
+ *   3. 액센트는 CTA·링크·verified 표시에만.
+ *   4. 종이/카드의 hairline + 부드러운 라운드(2xl)로 정돈된 미니멀.
  * ────────────────────────────────────────────────────────────── */
 
 @theme {
@@ -22,30 +22,30 @@
     "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
 
-  /* Surfaces — warm cream paper */
-  --color-paper-50: #faf6ee;     /* page (warm cream) */
-  --color-paper-100: #ffffff;    /* elevated card */
+  /* Surfaces */
+  --color-paper-50: #f7f8fa;     /* page (cool near-white) */
+  --color-paper-100: #ffffff;    /* card */
 
-  /* Text & borders — warm gray-brown */
-  --color-ink-100: #ece4d4;      /* warm hairline border */
-  --color-ink-500: #8f7e6a;      /* muted warm gray */
-  --color-ink-700: #5b4d3f;      /* secondary warm */
-  --color-ink-900: #2f2620;      /* near primary */
-  --color-ink-950: #1c1612;      /* primary text */
+  /* Text & borders — cool slate, slight blue tint */
+  --color-ink-100: #e6e8ee;      /* hairline border */
+  --color-ink-500: #6b7280;      /* muted */
+  --color-ink-700: #3f4757;      /* secondary */
+  --color-ink-900: #1c2230;      /* near-primary heading */
+  --color-ink-950: #0b1220;      /* primary text */
 
-  /* Accent — amber (warm + trustworthy) */
-  --color-trust-500: #d97706;    /* amber-600 hover */
-  --color-trust-600: #b45309;    /* amber-700 primary accent */
+  /* Accent — emerald (verified) */
+  --color-trust-500: #10b981;    /* emerald-500 (hover) */
+  --color-trust-600: #059669;    /* emerald-600 (primary) */
 
-  /* Status (warmer + readable on cream) */
-  --color-valid-600: #15803d;    /* green-700 */
-  --color-warn-600: #b91c1c;     /* red-700 */
+  /* Status — emerald (valid, unified) + amber for warn */
+  --color-valid-600: #059669;
+  --color-warn-600: #d97706;
 }
 
 :root {
   color-scheme: light;
-  background: #faf6ee;
-  color: #1c1612;
+  background: #f7f8fa;
+  color: #0b1220;
   font-family: var(--font-sans);
   font-feature-settings: "cv11", "ss01";
   font-synthesis: none;
@@ -77,7 +77,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid rgba(180, 83, 9, 0.45);
+  outline: 2px solid rgba(5, 150, 105, 0.45);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -97,8 +97,8 @@ a {
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #d8cdb8; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #c5b89e; }
+::-webkit-scrollbar-thumb { background: #d8dde6; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #c5cdd9; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-::selection { background: rgba(180, 83, 9, 0.18); color: #1c1612; }
+::selection { background: rgba(5, 150, 105, 0.18); color: #0b1220; }
