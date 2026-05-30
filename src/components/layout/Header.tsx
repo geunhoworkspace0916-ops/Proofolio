@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { ArrowUpRight, ShieldCheck } from "lucide-react";
+import { ShieldCheck, Wallet } from "lucide-react";
 import { SEPOLIA_CHAIN_ID } from "../../config/networks";
 import { useWallet } from "../../wallet/useWallet";
 
@@ -26,10 +26,10 @@ export function Header() {
   } = useWallet();
 
   const networkLabel = !address
-    ? "Not Connected"
+    ? "지갑 미연결"
     : isSepolia
       ? "Sepolia"
-      : "Wrong Network";
+      : "다른 네트워크";
   const dotClass = !address
     ? "bg-ink-500"
     : isSepolia
@@ -37,14 +37,16 @@ export function Header() {
       : "bg-warn-600";
 
   return (
-    <header className="border-b border-ink-100">
+    <header className="border-b border-ink-100 bg-paper-50/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-5 py-4 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
         <NavLink
           to="/"
-          className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-ink-950"
+          className="flex items-center gap-2 text-base font-semibold tracking-tight text-ink-950"
         >
-          <ShieldCheck aria-hidden="true" size={18} strokeWidth={1.75} />
-          <span>Proofolio</span>
+          <span className="grid size-8 place-items-center rounded-lg bg-trust-600 text-white">
+            <ShieldCheck aria-hidden="true" size={16} strokeWidth={2} />
+          </span>
+          Proofolio
         </NavLink>
 
         <nav className="-mx-2 flex flex-wrap items-center gap-0.5 text-sm text-ink-700">
@@ -55,8 +57,8 @@ export function Header() {
               end={item.to === "/"}
               className={({ isActive }) =>
                 [
-                  "rounded-md px-3 py-1.5 transition hover:text-ink-950",
-                  isActive ? "text-ink-950" : "",
+                  "rounded-lg px-3 py-1.5 transition hover:bg-paper-100 hover:text-ink-950",
+                  isActive ? "bg-paper-100 text-ink-950 shadow-[0_1px_2px_rgba(28,22,18,0.04)]" : "",
                 ].join(" ")
               }
             >
@@ -65,8 +67,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="inline-flex items-center gap-2 text-xs text-ink-500">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-100 bg-paper-100 px-2.5 py-1 text-xs text-ink-700">
             <span className={`size-1.5 rounded-full ${dotClass}`} aria-hidden />
             {networkLabel}
           </span>
@@ -75,7 +77,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => void switchToSepolia()}
-              className="rounded-md border border-warn-600/40 px-2.5 py-1 text-xs font-medium text-warn-600 transition hover:bg-warn-600/10"
+              className="rounded-full border border-warn-600/40 bg-paper-100 px-3 py-1 text-xs font-medium text-warn-600 transition hover:bg-warn-600/10"
             >
               Sepolia 전환
             </button>
@@ -85,12 +87,14 @@ export function Header() {
           {isIssuer ? <RoleTag label="Issuer" /> : null}
 
           {address ? (
-            <span className="font-mono text-xs text-ink-500">{shortAddress}</span>
+            <span className="rounded-full border border-ink-100 bg-paper-100 px-2.5 py-1 font-mono text-xs text-ink-700">
+              {shortAddress}
+            </span>
           ) : (
             <button
               type="button"
               onClick={() => void connectWallet()}
-              className="inline-flex items-center gap-1.5 rounded-md bg-ink-950 px-3 py-1.5 text-sm font-medium text-paper-50 transition hover:bg-ink-900 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-full bg-trust-600 px-3.5 py-1.5 text-sm font-medium text-white shadow-[0_1px_2px_rgba(28,22,18,0.08)] transition hover:bg-trust-500 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={status === "connecting"}
               title={
                 hasMetaMask
@@ -98,8 +102,8 @@ export function Header() {
                   : "MetaMask 지갑을 찾을 수 없습니다."
               }
             >
+              <Wallet aria-hidden="true" size={14} strokeWidth={2} />
               {status === "connecting" ? "연결 중" : "지갑 연결"}
-              <ArrowUpRight aria-hidden="true" size={14} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -114,7 +118,7 @@ export function Header() {
 
 function RoleTag({ label }: { label: string }) {
   return (
-    <span className="rounded-md border border-ink-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-ink-700">
+    <span className="rounded-full border border-trust-600/30 bg-trust-600/8 px-2.5 py-1 text-xs font-medium text-trust-600">
       {label}
     </span>
   );

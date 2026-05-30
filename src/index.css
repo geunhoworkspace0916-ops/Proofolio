@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 /* ──────────────────────────────────────────────────────────────
- * Proofolio — editorial dark
+ * Proofolio — warm paper light
  *
- * Principles
- *   1. Monochrome. No chromatic accent. Off-white text on near-
- *      black. Status colors only on status pills (small dots).
- *   2. Typography-led. Tight tracking on display, careful
- *      hierarchy. Mono for hashes/addresses.
- *   3. Rules > cards. Subtle borders, almost no backgrounds.
- *   4. No glow. No gradient text. No ambient page wash.
+ * 톤
+ *   따뜻한 크림 페이퍼 위에 깊은 갈색-블랙 텍스트.
+ *   액센트는 절제된 앰버(amber-700) — 따뜻함 + 신뢰.
+ *   카드는 흰 카드 + 미세한 갈색 그림자로 종이 위 카드 느낌.
+ * 원칙
+ *   1. 가독성 최우선 (충분한 본문 크기, 차분한 line-height).
+ *   2. 무채색 X — 모든 회색에 미세한 갈색 토닝.
+ *   3. 카드와 호흡 — 부드러운 라운드, 종이 같은 그림자.
+ *   4. 액센트는 CTA·링크·상태 뱃지에만 절제해서 사용.
  * ────────────────────────────────────────────────────────────── */
 
 @theme {
@@ -20,32 +22,32 @@
     "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
 
-  /* Surfaces */
-  --color-paper-50: #0a0a0a;    /* page */
-  --color-paper-100: #131313;   /* faint elevated surface (rarely used) */
+  /* Surfaces — warm cream paper */
+  --color-paper-50: #faf6ee;     /* page (warm cream) */
+  --color-paper-100: #ffffff;    /* elevated card */
 
-  /* Text & borders — neutral grays */
-  --color-ink-100: #1f1f1f;     /* hairline border */
-  --color-ink-500: #6e6e6e;     /* muted / captions */
-  --color-ink-700: #a3a3a3;     /* secondary body */
-  --color-ink-900: #d4d4d4;     /* near-primary */
-  --color-ink-950: #f5f5f5;     /* primary text (off-white) */
+  /* Text & borders — warm gray-brown */
+  --color-ink-100: #ece4d4;      /* warm hairline border */
+  --color-ink-500: #8f7e6a;      /* muted warm gray */
+  --color-ink-700: #5b4d3f;      /* secondary warm */
+  --color-ink-900: #2f2620;      /* near primary */
+  --color-ink-950: #1c1612;      /* primary text */
 
-  /* "trust" token kept for compatibility but neutralized */
-  --color-trust-500: #d4d4d4;
-  --color-trust-600: #a3a3a3;
+  /* Accent — amber (warm + trustworthy) */
+  --color-trust-500: #d97706;    /* amber-600 hover */
+  --color-trust-600: #b45309;    /* amber-700 primary accent */
 
-  /* Status — used sparingly, mostly as dots */
-  --color-valid-600: #3fb950;
-  --color-warn-600: #d29922;
+  /* Status (warmer + readable on cream) */
+  --color-valid-600: #15803d;    /* green-700 */
+  --color-warn-600: #b91c1c;     /* red-700 */
 }
 
 :root {
-  color-scheme: dark;
-  background: #0a0a0a;
-  color: #f5f5f5;
+  color-scheme: light;
+  background: #faf6ee;
+  color: #1c1612;
   font-family: var(--font-sans);
-  font-feature-settings: "cv11", "ss01", "ss03";
+  font-feature-settings: "cv11", "ss01";
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -75,9 +77,9 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 1px solid rgba(245, 245, 245, 0.55);
+  outline: 2px solid rgba(180, 83, 9, 0.45);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 a {
@@ -85,7 +87,6 @@ a {
   text-decoration: none;
 }
 
-/* Tabular numbers for technical data (addresses, ids, balances) */
 .font-mono,
 .tabular-nums {
   font-variant-numeric: tabular-nums;
@@ -96,8 +97,8 @@ a {
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #232323; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #2e2e2e; }
+::-webkit-scrollbar-thumb { background: #d8cdb8; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #c5b89e; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-::selection { background: rgba(245, 245, 245, 0.18); color: #ffffff; }
+::selection { background: rgba(180, 83, 9, 0.18); color: #1c1612; }
