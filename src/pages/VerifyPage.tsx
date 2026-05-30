@@ -1,15 +1,10 @@
 import { FormEvent, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowRight, ExternalLink, ShieldCheck } from "lucide-react";
 import { shortenAddress } from "../lib/address";
 import { useCredentialVerification } from "../hooks/useCredentialVerification";
-
-function formatIssuedAt(value: bigint) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(Number(value) * 1000));
-}
+import { formatUnixTimestamp } from "../lib/date";
+import { createIssuerProfilePath } from "../lib/links";
 
 export function VerifyPage() {
   const navigate = useNavigate();
@@ -103,7 +98,7 @@ export function VerifyPage() {
                 <div>
                   <dt className="text-ink-500">발급일</dt>
                   <dd className="mt-1 font-medium text-ink-950">
-                    {formatIssuedAt(verification.data.issuedAt)}
+                    {formatUnixTimestamp(verification.data.issuedAt)}
                   </dd>
                 </div>
                 <div>
@@ -111,6 +106,13 @@ export function VerifyPage() {
                   <dd className="mt-1 font-medium text-ink-950">
                     {verification.data.issuerName || "이름 없음"}
                     {verification.data.issuerActive ? " · Active" : " · Inactive"}
+                    <Link
+                      to={createIssuerProfilePath(verification.data.issuer)}
+                      className="ml-2 inline-flex items-center gap-1 text-trust-600 hover:text-trust-500"
+                    >
+                      기관 프로필
+                      <ExternalLink aria-hidden="true" size={14} />
+                    </Link>
                   </dd>
                 </div>
                 <div>

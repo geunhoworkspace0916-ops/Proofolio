@@ -44,6 +44,10 @@ export type IssuerSummary = IssuerRecord & {
   issuedCount: number;
 };
 
+export type HolderCredential = CredentialVerification & {
+  tokenId: bigint;
+};
+
 type IssuerTuple = readonly [string, string, boolean, bigint] & {
   name: string;
   metaURI: string;
@@ -203,6 +207,27 @@ export async function readCredentialIds(holder: string) {
   )) as bigint[];
 }
 
+export async function readHolderCredentials(
+  holder: string,
+): Promise<HolderCredential[]> {
+  const tokenIds = await readCredentialIds(holder);
+
+  const credentials = await Promise.all(
+    tokenIds.map(async (tokenId) => ({
+      ...(await readCredentialVerification(tokenId)),
+      tokenId,
+    })),
+  );
+
+  return credentials.sort((left, right) => {
+    if (left.tokenId === right.tokenId) {
+      return 0;
+    }
+
+    return left.tokenId < right.tokenId ? 1 : -1;
+  });
+}
+
 export async function readIssuerSummaries(): Promise<IssuerSummary[]> {
   const contract = getReadProofolioContract();
   const [registeredLogs, issuedLogs] = await Promise.all([
@@ -251,6 +276,23 @@ export async function readIssuerSummaries(): Promise<IssuerSummary[]> {
 
     return left.registeredAt < right.registeredAt ? 1 : -1;
   });
+}
+
+export async function readIssuerProfile(
+  issuer: string,
+): Promise<IssuerSummary> {
+  const contract = getReadProofolioContract();
+  const address = normalizeAddress(issuer);
+  const [record, issuedLogs] = await Promise.all([
+    readIssuer(address),
+    contract.queryFilter(contract.filters.CredentialIssued(null, address), 0, "latest"),
+  ]);
+
+  return {
+    ...record,
+    address,
+    issuedCount: issuedLogs.length,
+  };
 }
 
 export async function registerIssuer(

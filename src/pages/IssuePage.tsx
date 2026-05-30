@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import QRCode from "qrcode";
 import {
   CheckCircle2,
   Copy,
@@ -12,7 +11,7 @@ import { Badge } from "../components/ui/Badge";
 import { Button, ButtonLink } from "../components/ui/Button";
 import { Card, CardTitle } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
-import { Modal } from "../components/ui/Modal";
+import { QrCodeModal } from "../components/ui/QrCodeModal";
 import { Select } from "../components/ui/Select";
 import {
   TransactionToast,
@@ -29,6 +28,7 @@ import {
   readIssuer,
   type IssuerRecord,
 } from "../lib/proofolio";
+import { createVerifyUrl } from "../lib/links";
 import { useWallet } from "../wallet/useWallet";
 
 const credentialTypes = ["수료", "경력", "프로젝트", "수상"] as const;
@@ -64,10 +64,6 @@ const initialFormState: IssueFormState = {
 
 function isReceiptSuccessful(status: number | null | undefined) {
   return status === undefined || status === null || status === 1;
-}
-
-function createVerifyUrl(tokenId: bigint) {
-  return new URL(`/verify/${tokenId.toString()}`, window.location.origin).toString();
 }
 
 function validateForm(
@@ -124,8 +120,6 @@ export function IssuePage() {
   const [isIssuing, setIsIssuing] = useState(false);
   const [issueResult, setIssueResult] = useState<IssueResult | null>(null);
   const [qrOpen, setQrOpen] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [qrError, setQrError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const hashRequestId = useRef(0);
 
@@ -192,38 +186,6 @@ export function IssuePage() {
       active = false;
     };
   }, [address]);
-
-  useEffect(() => {
-    if (!qrOpen || !issueResult) {
-      setQrDataUrl(null);
-      setQrError(null);
-      return;
-    }
-
-    let active = true;
-
-    setQrDataUrl(null);
-    setQrError(null);
-
-    QRCode.toDataURL(issueResult.verifyUrl, {
-      margin: 1,
-      width: 240,
-    })
-      .then((url) => {
-        if (active) {
-          setQrDataUrl(url);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setQrError("QR 코드를 생성하지 못했습니다.");
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [issueResult, qrOpen]);
 
   useEffect(() => {
     if (!linkCopied) {
@@ -510,11 +472,19 @@ export function IssuePage() {
         </Card>
       )}
 
-      <QrModal
-        dataUrl={qrDataUrl}
-        error={qrError}
+      <QrCodeModal
+        fileName={
+          issueResult
+            ? `proofolio-credential-${issueResult.tokenId.toString()}-qr.png`
+            : undefined
+        }
         open={qrOpen}
-        verifyUrl={issueResult?.verifyUrl ?? ""}
+        title={
+          issueResult
+            ? `증명서 #${issueResult.tokenId.toString()} 검증 QR`
+            : "검증 QR"
+        }
+        url={issueResult?.verifyUrl ?? ""}
         onClose={() => setQrOpen(false)}
       />
       <TransactionToast
@@ -658,38 +628,5 @@ function IssueCompleteCard({
         </Button>
       </div>
     </Card>
-  );
-}
-
-function QrModal({
-  dataUrl,
-  error,
-  onClose,
-  open,
-  verifyUrl,
-}: {
-  dataUrl: string | null;
-  error: string | null;
-  onClose: () => void;
-  open: boolean;
-  verifyUrl: string;
-}) {
-  return (
-    <Modal open={open} title="검증 QR" onClose={onClose}>
-      {error ? (
-        <p className="text-sm text-warn-600">{error}</p>
-      ) : dataUrl ? (
-        <div className="grid justify-items-center gap-3">
-          <img
-            src={dataUrl}
-            alt="증명서 검증 링크 QR 코드"
-            className="size-60 rounded-md border border-ink-100 bg-white p-2"
-          />
-          <p className="break-all text-center text-xs text-ink-500">{verifyUrl}</p>
-        </div>
-      ) : (
-        <div className="h-60 rounded-md bg-paper-100" />
-      )}
-    </Modal>
   );
 }
