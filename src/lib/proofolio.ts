@@ -131,6 +131,36 @@ export function getReadProofolioContract() {
   return getProofolioContract(getReadProvider());
 }
 
+// Public Sepolia RPCs typically cap eth_getLogs at 50k blocks per call,
+// so we chunk requests and start from the configured deploy block when
+// available (otherwise the last ~50k blocks as a safe fallback).
+const MAX_LOG_RANGE = 49_000;
+
+async function getEventStartBlock(): Promise<number> {
+  if (appEnv.contractDeployBlock !== null) {
+    return appEnv.contractDeployBlock;
+  }
+  const latest = await getReadProvider().getBlockNumber();
+  return Math.max(0, latest - MAX_LOG_RANGE);
+}
+
+async function queryFilterChunked(
+  contract: Contract,
+  filter: Parameters<Contract["queryFilter"]>[0],
+): Promise<(EventLog | Log)[]> {
+  const start = await getEventStartBlock();
+  const latest = await getReadProvider().getBlockNumber();
+  const out: (EventLog | Log)[] = [];
+  let cursor = start;
+  while (cursor <= latest) {
+    const end = Math.min(cursor + MAX_LOG_RANGE - 1, latest);
+    const logs = await contract.queryFilter(filter, cursor, end);
+    out.push(...logs);
+    cursor = end + 1;
+  }
+  return out;
+}
+
 export function getWriteProofolioContract(signer: Signer) {
   return getProofolioContract(signer);
 }
@@ -207,10 +237,9 @@ export async function readCredentialValidity(tokenId: bigint) {
 
 export async function readCredentialIssuedTransactionHash(tokenId: bigint) {
   const contract = getReadProofolioContract();
-  const logs = await contract.queryFilter(
+  const logs = await queryFilterChunked(
+    contract,
     contract.filters.CredentialIssued(tokenId),
-    0,
-    "latest",
   );
 
   return logs[0]?.transactionHash ?? null;
@@ -246,8 +275,8 @@ export async function readHolderCredentials(
 export async function readIssuerSummaries(): Promise<IssuerSummary[]> {
   const contract = getReadProofolioContract();
   const [registeredLogs, issuedLogs] = await Promise.all([
-    contract.queryFilter(contract.filters.IssuerRegistered(), 0, "latest"),
-    contract.queryFilter(contract.filters.CredentialIssued(), 0, "latest"),
+    queryFilterChunked(contract, contract.filters.IssuerRegistered()),
+    queryFilterChunked(contract, contract.filters.CredentialIssued()),
   ]);
 
   const issuerAddresses = new Map<string, string>();
@@ -300,7 +329,7 @@ export async function readIssuerProfile(
   const address = normalizeAddress(issuer);
   const [record, issuedLogs] = await Promise.all([
     readIssuer(address),
-    contract.queryFilter(contract.filters.CredentialIssued(null, address), 0, "latest"),
+    queryFilterChunked(contract, contract.filters.CredentialIssued(null, address)),
   ]);
 
   return {
