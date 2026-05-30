@@ -35,10 +35,10 @@ export function Header() {
     : "border-warn-600/20 bg-warn-600/10 text-warn-600";
 
   return (
-    <header className="border-b border-ink-100 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-ink-100/70 bg-paper-100/75 backdrop-blur-md">
       <div className="mx-auto flex min-h-16 w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <NavLink to="/" className="flex items-center gap-2 text-lg font-semibold">
-          <span className="grid size-9 place-items-center rounded-md bg-ink-950 text-white">
+          <span className="grid size-9 place-items-center rounded-lg bg-trust-600 text-white shadow-[0_0_24px_-6px_rgba(124,92,255,0.6)]">
             <ShieldCheck aria-hidden="true" size={20} />
           </span>
           Proofolio
@@ -71,7 +71,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => void switchToSepolia()}
-              className="inline-flex items-center gap-2 rounded-md border border-warn-600/20 bg-white px-3 py-2 text-sm font-semibold text-warn-600 shadow-sm transition hover:bg-warn-600/10"
+              className="inline-flex items-center gap-2 rounded-md border border-warn-600/30 bg-paper-100 px-3 py-2 text-sm font-semibold text-warn-600 transition hover:bg-warn-600/10"
             >
               <AlertTriangle aria-hidden="true" size={16} />
               Sepolia 전환
@@ -95,7 +95,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => void connectWallet()}
-              className="inline-flex items-center gap-2 rounded-md bg-ink-950 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-900 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex items-center gap-2 rounded-md bg-trust-600 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_4px_18px_-6px_rgba(124,92,255,0.6)] transition hover:bg-trust-500 disabled:cursor-not-allowed disabled:opacity-70"
               disabled={status === "connecting"}
               title={
                 hasMetaMask

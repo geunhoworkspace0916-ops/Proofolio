@@ -4,7 +4,7 @@ export function Card({ children, className = "", ...props }: HTMLAttributes<HTML
   return (
     <div
       className={[
-        "rounded-lg border border-ink-100 bg-white p-5 shadow-sm",
+        "rounded-2xl border border-ink-100 bg-paper-100 p-5",
         className,
       ].join(" ")}
       {...props}

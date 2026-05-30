@@ -36,13 +36,35 @@ function readableVerificationError(error: unknown) {
   return "증명서 조회에 실패했습니다.";
 }
 
+// keccak256("CredentialNotFound(uint256)") 의 첫 4바이트 — 일부 RPC에서 ethers가
+// 커스텀 에러를 ABI로 디코딩하지 못하는 경우가 있어 selector로도 감지한다.
+const CREDENTIAL_NOT_FOUND_SELECTOR = "0x9a1c8dc6";
+
 function isCredentialNotFound(error: unknown) {
   const errorName = getContractErrorName(error);
 
-  return (
-    errorName === "CredentialNotFound" ||
-    (error instanceof Error && error.message.includes("CredentialNotFound"))
-  );
+  if (errorName === "CredentialNotFound") {
+    return true;
+  }
+
+  const candidate = error as { data?: string; message?: string };
+
+  if (
+    typeof candidate.data === "string" &&
+    candidate.data.toLowerCase().startsWith(CREDENTIAL_NOT_FOUND_SELECTOR)
+  ) {
+    return true;
+  }
+
+  if (
+    typeof candidate.message === "string" &&
+    (candidate.message.includes("CredentialNotFound") ||
+      candidate.message.toLowerCase().includes(CREDENTIAL_NOT_FOUND_SELECTOR))
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 export function useCredentialVerification(tokenIdParam: string | undefined) {

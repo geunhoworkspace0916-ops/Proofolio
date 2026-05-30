@@ -47,7 +47,7 @@ export function HomePage() {
             Ethereum Sepolia
           </span>
           <div className="space-y-3">
-            <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-normal text-ink-950 sm:text-5xl">
+            <h1 className="max-w-3xl bg-gradient-to-br from-ink-950 via-ink-900 to-trust-500 bg-clip-text text-4xl font-semibold leading-tight tracking-normal text-transparent sm:text-5xl">
               검증 가능한 디지털 증명서
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-ink-700">
@@ -58,7 +58,7 @@ export function HomePage() {
 
         <form
           onSubmit={handleVerify}
-          className="rounded-lg border border-ink-100 bg-white p-4 shadow-sm"
+          className="rounded-lg border border-ink-100 bg-paper-100 p-4 shadow-sm"
         >
           <label
             htmlFor="credential-query"
@@ -86,7 +86,7 @@ export function HomePage() {
       </section>
 
       <aside className="grid gap-4">
-        <div className="rounded-lg border border-ink-100 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-ink-100 bg-paper-100 p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-ink-900">연동 상태</h2>
           <dl className="mt-4 grid gap-3 text-sm">
             <div className="flex items-center justify-between gap-4">
@@ -124,7 +124,7 @@ export function HomePage() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="group rounded-lg border border-ink-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-trust-600/30 hover:shadow-md"
+                className="group rounded-lg border border-ink-100 bg-paper-100 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-trust-600/30 hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
                   <span className="grid size-10 place-items-center rounded-md bg-paper-100 text-trust-600">

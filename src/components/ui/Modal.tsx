@@ -14,9 +14,9 @@ export function Modal({ children, onClose, open, title }: ModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-40 grid place-items-center bg-ink-950/40 px-4 py-6">
+    <div className="fixed inset-0 z-40 grid place-items-center bg-black/60 backdrop-blur-sm px-4 py-6">
       <div
-        className="w-full max-w-sm rounded-lg border border-ink-100 bg-white p-5 shadow-lg"
+        className="w-full max-w-sm rounded-2xl border border-ink-100 bg-paper-100 p-5 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

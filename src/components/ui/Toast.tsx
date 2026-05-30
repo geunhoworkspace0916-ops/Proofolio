@@ -33,7 +33,7 @@ export function TransactionToast({ onDismiss, toast }: TransactionToastProps) {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-[min(calc(100vw-2rem),24rem)] rounded-lg border border-ink-100 bg-white p-4 shadow-lg">
+    <div className="fixed bottom-4 right-4 z-50 w-[min(calc(100vw-2rem),24rem)] rounded-2xl border border-ink-100 bg-paper-100 p-4 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase text-ink-500">

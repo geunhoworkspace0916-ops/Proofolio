@@ -284,7 +284,7 @@ function VerificationContent({
 
   if (state.status === "not_found") {
     return (
-      <Card className="border-ink-100 bg-white">
+      <Card>
         <div className="flex items-start gap-3">
           <span className="grid size-12 place-items-center rounded-md bg-paper-100 text-ink-500">
             <SearchX aria-hidden="true" size={24} />
@@ -343,7 +343,7 @@ function StatusBanner({
   return (
     <Card className={status.className}>
       <div className="flex items-start gap-3">
-        <span className="grid size-12 shrink-0 place-items-center rounded-md bg-white/70">
+        <span className="grid size-12 shrink-0 place-items-center rounded-md bg-current/10">
           <Icon aria-hidden="true" size={24} />
         </span>
         <div>
