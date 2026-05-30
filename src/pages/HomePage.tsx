@@ -1,27 +1,24 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, BadgeCheck, Building2, FileKey2 } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { hasContractConfig, hasReadProviderConfig } from "../config/env";
 import { useWallet } from "../wallet/useWallet";
 
 const roleLinks = [
   {
     to: "/issue",
-    title: "증명서 발급",
-    body: "등록된 발급기관용 화면",
-    icon: FileKey2,
+    label: "증명서 발급",
+    hint: "발급기관 — 보유자에게 발급",
   },
   {
     to: "/credentials",
-    title: "내 증명서",
-    body: "보유자가 받은 증명서 목록",
-    icon: BadgeCheck,
+    label: "내 증명서",
+    hint: "보유자 — 받은 증명서 목록",
   },
   {
     to: "/admin",
-    title: "기관 관리",
-    body: "관리자용 발급기관 레지스트리",
-    icon: Building2,
+    label: "기관 관리",
+    hint: "관리자 — 발급기관 레지스트리",
   },
 ];
 
@@ -40,106 +37,162 @@ export function HomePage() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-      <section className="space-y-6">
-        <div className="space-y-4">
-          <span className="inline-flex rounded-md border border-trust-600/20 bg-trust-600/10 px-3 py-1 text-sm font-semibold text-trust-600">
-            Ethereum Sepolia
-          </span>
-          <div className="space-y-3">
-            <h1 className="max-w-3xl bg-gradient-to-br from-ink-950 via-ink-900 to-trust-500 bg-clip-text text-4xl font-semibold leading-tight tracking-normal text-transparent sm:text-5xl">
-              검증 가능한 디지털 증명서
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-ink-700">
-              발급기관의 온체인 기록으로 증명서 발급 사실과 파일 무결성을 확인합니다.
-            </p>
-          </div>
-        </div>
+    <div className="space-y-20">
+      <Hero
+        query={query}
+        onQueryChange={setQuery}
+        onVerify={handleVerify}
+      />
 
-        <form
-          onSubmit={handleVerify}
-          className="rounded-lg border border-ink-100 bg-paper-100 p-4 shadow-sm"
+      <QuickLinks />
+
+      <ConnectionStrip
+        hasReadRPC={hasReadProviderConfig}
+        hasContract={hasContractConfig}
+        shortAddress={shortAddress}
+        role={isAdmin ? "Admin" : isIssuer ? "Issuer" : null}
+      />
+    </div>
+  );
+}
+
+function Hero({
+  query,
+  onQueryChange,
+  onVerify,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+  onVerify: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <section>
+      <Eyebrow>Verifiable Credentials · Ethereum Sepolia</Eyebrow>
+
+      <h1 className="mt-5 max-w-3xl text-[40px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink-950 sm:text-[56px]">
+        검증 가능한 디지털 증명서.
+      </h1>
+
+      <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-700">
+        발급기관의 온체인 기록으로 증명서 발급 사실과 파일 무결성을 확인합니다.
+        PDF가 아니라 발급자의 서명을 믿습니다.
+      </p>
+
+      <form onSubmit={onVerify} className="mt-10 max-w-xl">
+        <label
+          htmlFor="credential-query"
+          className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-500"
         >
-          <label
-            htmlFor="credential-query"
-            className="text-sm font-semibold text-ink-900"
+          증명서 검증
+        </label>
+        <div className="mt-2 flex items-center gap-3 border-b border-ink-100 pb-2 focus-within:border-ink-950">
+          <input
+            id="credential-query"
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="증명서 ID 또는 검증 링크"
+            className="flex-1 bg-transparent py-1 text-[15px] text-ink-950 placeholder:text-ink-500 outline-none"
+          />
+          <button
+            type="submit"
+            className="inline-flex items-center gap-1 text-sm font-medium text-ink-950 transition hover:opacity-70"
           >
-            증명서 ID 또는 검증 링크
-          </label>
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-            <input
-              id="credential-query"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="예: 12 또는 /verify/12"
-              className="min-h-11 flex-1 rounded-md border border-ink-100 bg-paper-50 px-3 text-ink-950 placeholder:text-ink-500"
-            />
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-trust-600 px-4 font-semibold text-white shadow-sm transition hover:bg-trust-500"
+            검증
+            <ArrowRight aria-hidden="true" size={14} strokeWidth={2} />
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+function QuickLinks() {
+  return (
+    <section>
+      <Eyebrow>시작하기</Eyebrow>
+      <ul className="mt-4 divide-y divide-ink-100 border-y border-ink-100">
+        {roleLinks.map((item) => (
+          <li key={item.to}>
+            <Link
+              to={item.to}
+              className="group flex items-center justify-between py-5 transition"
             >
-              검증
-              <ArrowRight aria-hidden="true" size={17} />
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <aside className="grid gap-4">
-        <div className="rounded-lg border border-ink-100 bg-paper-100 p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink-900">연동 상태</h2>
-          <dl className="mt-4 grid gap-3 text-sm">
-            <div className="flex items-center justify-between gap-4">
-              <dt className="text-ink-500">RPC</dt>
-              <dd className="font-medium text-ink-900">
-                {hasReadProviderConfig ? "설정됨" : "미설정"}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <dt className="text-ink-500">컨트랙트 주소</dt>
-              <dd className="font-medium text-ink-900">
-                {hasContractConfig ? "설정됨" : "미설정"}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <dt className="text-ink-500">지갑</dt>
-              <dd className="font-medium text-ink-900">
-                {shortAddress ?? "미연결"}
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <dt className="text-ink-500">역할</dt>
-              <dd className="font-medium text-ink-900">
-                {isAdmin ? "Admin" : isIssuer ? "Issuer" : "일반/미확인"}
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <div className="grid gap-3">
-          {roleLinks.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="group rounded-lg border border-ink-100 bg-paper-100 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-trust-600/30 hover:shadow-md"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="grid size-10 place-items-center rounded-md bg-paper-100 text-trust-600">
-                    <Icon aria-hidden="true" size={20} />
-                  </span>
-                  <div>
-                    <h2 className="font-semibold text-ink-950">{item.title}</h2>
-                    <p className="mt-1 text-sm text-ink-500">{item.body}</p>
-                  </div>
+              <div>
+                <div className="text-[15px] font-medium text-ink-950 transition group-hover:translate-x-0.5">
+                  {item.label}
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-      </aside>
+                <div className="mt-0.5 text-sm text-ink-500">{item.hint}</div>
+              </div>
+              <ArrowUpRight
+                aria-hidden="true"
+                size={16}
+                strokeWidth={1.75}
+                className="text-ink-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink-950"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ConnectionStrip({
+  hasReadRPC,
+  hasContract,
+  shortAddress,
+  role,
+}: {
+  hasReadRPC: boolean;
+  hasContract: boolean;
+  shortAddress: string | null;
+  role: "Admin" | "Issuer" | null;
+}) {
+  return (
+    <section className="border-t border-ink-100 pt-6">
+      <Eyebrow>연동 상태</Eyebrow>
+      <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-4 text-sm sm:grid-cols-4">
+        <Field label="RPC" value={hasReadRPC ? "설정됨" : "미설정"} />
+        <Field label="컨트랙트" value={hasContract ? "설정됨" : "미설정"} />
+        <Field
+          label="지갑"
+          value={shortAddress ?? "미연결"}
+          mono={Boolean(shortAddress)}
+        />
+        <Field label="역할" value={role ?? "—"} />
+      </dl>
+    </section>
+  );
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-500">
+      {children}
+    </p>
+  );
+}
+
+function Field({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <div>
+      <dt className="text-xs text-ink-500">{label}</dt>
+      <dd
+        className={[
+          "mt-1 text-ink-950",
+          mono ? "font-mono text-[13px]" : "text-sm font-medium",
+        ].join(" ")}
+      >
+        {value}
+      </dd>
     </div>
   );
 }

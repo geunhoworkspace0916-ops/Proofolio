@@ -4,12 +4,11 @@ type ButtonVariant = "primary" | "secondary" | "warning" | "ghost";
 type ButtonSize = "sm" | "md";
 
 const variantClassNames: Record<ButtonVariant, string> = {
-  primary:
-    "bg-trust-600 text-white shadow-[0_4px_18px_-6px_rgba(124,92,255,0.55)] hover:bg-trust-500",
+  primary: "bg-ink-950 text-paper-50 hover:bg-ink-900",
   secondary:
-    "border border-ink-100 bg-paper-100 text-ink-900 hover:bg-paper-100/70 hover:text-ink-950",
+    "border border-ink-100 text-ink-900 hover:bg-paper-100 hover:text-ink-950",
   warning:
-    "border border-warn-600/30 bg-paper-100 text-warn-600 hover:bg-warn-600/10",
+    "border border-warn-600/40 text-warn-600 hover:bg-warn-600/10",
   ghost: "text-ink-700 hover:bg-paper-100 hover:text-ink-950",
 };
 
