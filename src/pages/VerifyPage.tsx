@@ -14,6 +14,7 @@ import { Badge } from "../components/ui/Badge";
 import { Button, ButtonLink } from "../components/ui/Button";
 import { Card, CardTitle } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { PageHeader } from "../components/layout/PageHeader";
 import { appEnv } from "../config/env";
 import { shortenAddress } from "../lib/address";
 import { formatUnixTimestamp } from "../lib/date";
@@ -194,7 +195,11 @@ export function VerifyPage() {
 
   return (
     <section className="mx-auto max-w-3xl space-y-6">
-      <PageHeader tokenId={tokenId} />
+      <PageHeader
+        eyebrow="Verifier"
+        title={`증명서 검증${tokenId ? ` #${tokenId}` : ""}`}
+        description="지갑 없이 Sepolia 읽기 전용 RPC로 조회합니다."
+      />
 
       {!tokenId ? (
         <LookupForm
@@ -213,20 +218,6 @@ export function VerifyPage() {
         />
       ) : null}
     </section>
-  );
-}
-
-function PageHeader({ tokenId }: { tokenId: string | undefined }) {
-  return (
-    <div>
-      <p className="text-sm font-semibold text-trust-600">Verifier</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-normal text-ink-950">
-        증명서 검증{tokenId ? ` #${tokenId}` : ""}
-      </h1>
-      <p className="mt-2 text-sm text-ink-500">
-        지갑 없이 Sepolia 읽기 전용 RPC로 조회합니다.
-      </p>
-    </div>
   );
 }
 

@@ -13,6 +13,7 @@ import {
   createVerifyUrl,
 } from "../lib/links";
 import { shortenAddress } from "../lib/address";
+import { PageHeader } from "../components/layout/PageHeader";
 import type { HolderCredential } from "../lib/proofolio";
 import { useHolderCredentials } from "../hooks/useHolderCredentials";
 import { useWallet } from "../wallet/useWallet";
@@ -60,7 +61,7 @@ export function MyCredentialsPage() {
   if (!address) {
     return (
       <section className="space-y-6">
-        <PageHeader count={0} />
+        <CredentialsHeader count={0} />
         <Card>
           <CardTitle>지갑 연결 필요</CardTitle>
           <p className="mt-2 text-sm leading-6 text-ink-500">
@@ -76,7 +77,7 @@ export function MyCredentialsPage() {
 
   return (
     <section className="space-y-6">
-      <PageHeader count={credentialsState.credentials.length} />
+      <CredentialsHeader count={credentialsState.credentials.length} />
 
       {credentialsState.status === "loading" ? <CredentialSkeletons /> : null}
 
@@ -143,17 +144,11 @@ export function MyCredentialsPage() {
   );
 }
 
-function PageHeader({ count }: { count: number }) {
+function CredentialsHeader({ count }: { count: number }) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <p className="text-sm font-semibold text-trust-600">Holder</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-normal text-ink-950">
-          내 증명서
-        </h1>
-      </div>
-      <p className="text-sm font-semibold text-ink-500">보유 {count}건</p>
-    </div>
+    <PageHeader eyebrow="Holder" title="내 증명서">
+      <div className="pt-1 text-sm text-ink-500">보유 {count}건</div>
+    </PageHeader>
   );
 }
 

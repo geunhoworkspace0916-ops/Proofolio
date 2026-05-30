@@ -13,6 +13,7 @@ import { Card, CardTitle } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { QrCodeModal } from "../components/ui/QrCodeModal";
 import { Select } from "../components/ui/Select";
+import { PageHeader } from "../components/layout/PageHeader";
 import {
   TransactionToast,
   type TransactionToastState,
@@ -341,7 +342,7 @@ export function IssuePage() {
   if (!address || (!hasIssuerAccess && !issuerLoading)) {
     return (
       <section className="space-y-6">
-        <PageHeader />
+        <PageHeader eyebrow="Issuer" title="증명서 발급" />
         <Card>
           <CardTitle>발급 권한 없음</CardTitle>
           <p className="mt-2 text-sm leading-6 text-ink-500">
@@ -363,7 +364,16 @@ export function IssuePage() {
 
   return (
     <section className="space-y-6">
-      <PageHeader issuerLabel={issuerLabel} issuerLoading={issuerLoading} />
+      <PageHeader eyebrow="Issuer" title="증명서 발급">
+        {issuerLabel || issuerLoading ? (
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-sm text-ink-500">
+            <span>발급기관</span>
+            <Badge tone={issuerLoading ? "neutral" : "success"}>
+              {issuerLoading ? "확인 중" : issuerLabel}
+            </Badge>
+          </div>
+        ) : null}
+      </PageHeader>
 
       {!isSepolia ? (
         <Card className="border-warn-600/20 bg-warn-600/5">
@@ -492,31 +502,6 @@ export function IssuePage() {
         onDismiss={() => setTransactionToast(null)}
       />
     </section>
-  );
-}
-
-function PageHeader({
-  issuerLabel,
-  issuerLoading = false,
-}: {
-  issuerLabel?: string;
-  issuerLoading?: boolean;
-}) {
-  return (
-    <div>
-      <p className="text-sm font-semibold text-trust-600">Issuer</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-normal text-ink-950">
-        증명서 발급
-      </h1>
-      {issuerLabel || issuerLoading ? (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-500">
-          <span>발급기관</span>
-          <Badge tone={issuerLoading ? "neutral" : "success"}>
-            {issuerLoading ? "확인 중" : issuerLabel}
-          </Badge>
-        </div>
-      ) : null}
-    </div>
   );
 }
 

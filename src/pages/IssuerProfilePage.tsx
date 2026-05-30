@@ -3,6 +3,7 @@ import { Building2, ExternalLink } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
 import { ButtonLink } from "../components/ui/Button";
 import { Card, CardTitle } from "../components/ui/Card";
+import { PageHeader } from "../components/layout/PageHeader";
 import { formatUnixDate } from "../lib/date";
 import { shortenAddress } from "../lib/address";
 import { useIssuerProfile } from "../hooks/useIssuerProfile";
@@ -13,12 +14,7 @@ export function IssuerProfilePage() {
 
   return (
     <section className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <p className="text-sm font-semibold text-trust-600">Issuer Profile</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-normal text-ink-950">
-          발급기관 프로필
-        </h1>
-      </div>
+      <PageHeader eyebrow="Issuer Profile" title="발급기관 프로필" />
 
       {profileState.status === "loading" ? (
         <Card>

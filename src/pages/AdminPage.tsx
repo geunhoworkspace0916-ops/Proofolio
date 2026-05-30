@@ -4,6 +4,7 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Card, CardTitle } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { PageHeader } from "../components/layout/PageHeader";
 import {
   TransactionToast,
   type TransactionToastState,
@@ -74,6 +75,20 @@ export function AdminPage() {
     () => new Set(registry.issuers.map((issuer) => normalizeAddress(issuer.address))),
     [registry.issuers],
   );
+
+  const issuerStats = useMemo(() => {
+    const active = registry.issuers.filter((issuer) => issuer.active).length;
+    const issued = registry.issuers.reduce(
+      (sum, issuer) => sum + issuer.issuedCount,
+      0,
+    );
+    return {
+      total: registry.issuers.length,
+      active,
+      inactive: registry.issuers.length - active,
+      issued,
+    };
+  }, [registry.issuers]);
 
   const canSubmitTransaction = Boolean(isAdmin && isSepolia && !busyAction);
 
@@ -164,7 +179,11 @@ export function AdminPage() {
   if (!address || !isAdmin) {
     return (
       <section className="space-y-6">
-        <PageHeader />
+        <PageHeader
+          eyebrow="Admin"
+          title="발급기관 관리"
+          description="발급기관을 등록하고 활성 상태를 관리합니다."
+        />
         <Card>
           <CardTitle>관리자만 접근 가능</CardTitle>
           <p className="mt-2 text-sm leading-6 text-ink-500">
@@ -182,7 +201,11 @@ export function AdminPage() {
 
   return (
     <section className="space-y-6">
-      <PageHeader />
+      <PageHeader
+        eyebrow="Admin"
+        title="발급기관 관리"
+        description="발급기관을 등록하고 활성 상태를 관리합니다."
+      />
 
       {!isSepolia ? (
         <Card className="border-warn-600/20 bg-warn-600/5">
@@ -252,22 +275,34 @@ export function AdminPage() {
         </Card>
 
         <Card>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle>등록된 발급기관</CardTitle>
               <p className="mt-1 text-sm text-ink-500">
-                총 {registry.issuers.length}곳
+                {issuerStats.total === 0 ? (
+                  "등록된 발급기관 없음"
+                ) : (
+                  <>
+                    총 {issuerStats.total}곳 · 활성 {issuerStats.active}
+                    {issuerStats.inactive > 0 ? ` · 비활성 ${issuerStats.inactive}` : ""}{" "}
+                    · 발급 {issuerStats.issued}건
+                  </>
+                )}
               </p>
             </div>
-            <Button
+            <button
+              type="button"
               onClick={() => void registry.refresh()}
-              size="sm"
-              variant="secondary"
               disabled={registry.loading}
+              className="inline-flex items-center gap-1 text-xs font-medium text-ink-500 transition hover:text-ink-950 disabled:opacity-50"
             >
-              <RefreshCw aria-hidden="true" size={16} />
+              <RefreshCw
+                aria-hidden="true"
+                size={13}
+                className={registry.loading ? "animate-spin" : ""}
+              />
               새로고침
-            </Button>
+            </button>
           </div>
 
           <IssuerList
@@ -286,18 +321,6 @@ export function AdminPage() {
         onDismiss={() => setTransactionToast(null)}
       />
     </section>
-  );
-}
-
-function PageHeader() {
-  return (
-    <div>
-      <p className="text-sm font-semibold text-trust-600">Admin</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-normal text-ink-950">
-        발급기관 관리
-      </h1>
-      <p className="mt-2 text-sm text-ink-500">Admin 전용</p>
-    </div>
   );
 }
 
@@ -371,7 +394,7 @@ function IssuerList({
                 <td className="py-3 pr-4 font-medium text-ink-950">
                   {issuer.name || "이름 없음"}
                 </td>
-                <td className="py-3 pr-4 text-ink-700">
+                <td className="py-3 pr-4 font-mono text-xs text-ink-700">
                   {shortenAddress(issuer.address)}
                 </td>
                 <td className="py-3 pr-4">
@@ -379,16 +402,23 @@ function IssuerList({
                     {issuer.active ? "활성" : "비활성"}
                   </Badge>
                 </td>
-                <td className="py-3 pr-4 text-ink-700">{issuer.issuedCount}</td>
-                <td className="py-3">
-                  <Button
+                <td className="py-3 pr-4 tabular-nums text-ink-700">
+                  {issuer.issuedCount}
+                </td>
+                <td className="py-3 text-right">
+                  <button
+                    type="button"
                     disabled={!canSubmitTransaction || busyAction === actionId}
                     onClick={() => void onStatusChange(issuer.address, nextActive)}
-                    size="sm"
-                    variant={issuer.active ? "warning" : "secondary"}
+                    className={[
+                      "text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
+                      issuer.active
+                        ? "text-ink-500 hover:text-warn-600"
+                        : "text-trust-600 hover:text-trust-500",
+                    ].join(" ")}
                   >
                     {issuer.active ? "비활성화" : "활성화"}
-                  </Button>
+                  </button>
                 </td>
               </tr>
             );
