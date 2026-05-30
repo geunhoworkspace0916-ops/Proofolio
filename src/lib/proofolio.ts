@@ -34,6 +34,10 @@ export type CredentialVerification = {
   revoked: boolean;
 };
 
+export type CredentialVerificationDetails = CredentialVerification & {
+  issuedTxHash: string | null;
+};
+
 export type WalletRoles = {
   isAdmin: boolean;
   isIssuer: boolean;
@@ -199,6 +203,17 @@ export async function readCredentialVerification(
 
 export async function readCredentialValidity(tokenId: bigint) {
   return (await getReadProofolioContract().isValid(tokenId)) as boolean;
+}
+
+export async function readCredentialIssuedTransactionHash(tokenId: bigint) {
+  const contract = getReadProofolioContract();
+  const logs = await contract.queryFilter(
+    contract.filters.CredentialIssued(tokenId),
+    0,
+    "latest",
+  );
+
+  return logs[0]?.transactionHash ?? null;
 }
 
 export async function readCredentialIds(holder: string) {

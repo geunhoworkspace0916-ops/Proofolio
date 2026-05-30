@@ -1,20 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   canReadProofolio,
+  readCredentialIssuedTransactionHash,
   readCredentialValidity,
   readCredentialVerification,
-  type CredentialVerification,
+  type CredentialVerificationDetails,
 } from "../lib/proofolio";
+import { getContractErrorName } from "../lib/contractErrors";
 
 type VerificationState =
   | { status: "idle"; data: null; isValid: null; error: null }
   | { status: "loading"; data: null; isValid: null; error: null }
   | {
       status: "success";
-      data: CredentialVerification;
+      data: CredentialVerificationDetails;
       isValid: boolean;
       error: null;
     }
+  | { status: "not_found"; data: null; isValid: null; error: string }
   | { status: "error"; data: null; isValid: null; error: string };
 
 function parseTokenId(value: string | undefined) {
@@ -31,6 +34,15 @@ function readableVerificationError(error: unknown) {
   }
 
   return "증명서 조회에 실패했습니다.";
+}
+
+function isCredentialNotFound(error: unknown) {
+  const errorName = getContractErrorName(error);
+
+  return (
+    errorName === "CredentialNotFound" ||
+    (error instanceof Error && error.message.includes("CredentialNotFound"))
+  );
 }
 
 export function useCredentialVerification(tokenIdParam: string | undefined) {
@@ -75,16 +87,32 @@ export function useCredentialVerification(tokenIdParam: string | undefined) {
     Promise.all([
       readCredentialVerification(tokenId),
       readCredentialValidity(tokenId),
+      readCredentialIssuedTransactionHash(tokenId).catch(() => null),
     ])
-      .then(([data, isValid]) => {
+      .then(([data, isValid, issuedTxHash]) => {
         if (!active) {
           return;
         }
 
-        setState({ status: "success", data, isValid, error: null });
+        setState({
+          status: "success",
+          data: { ...data, issuedTxHash },
+          isValid,
+          error: null,
+        });
       })
       .catch((caughtError) => {
         if (!active) {
+          return;
+        }
+
+        if (isCredentialNotFound(caughtError)) {
+          setState({
+            status: "not_found",
+            data: null,
+            isValid: null,
+            error: `해당 ID(#${tokenId.toString()})의 증명서를 찾을 수 없습니다.`,
+          });
           return;
         }
 
