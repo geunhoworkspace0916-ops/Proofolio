@@ -28,7 +28,13 @@ Proofolio shifts trust from editable PDFs or private databases to public on-chai
 
 ## Demo URL
 
-- Cloudflare Pages: TBD after `npm run pages:deploy`
+- Live: https://proofolio.pages.dev
+- Etherscan (verified contract): https://sepolia.etherscan.io/address/0x84b5e7F9BB2C87912528D4f63D9D9A7257475Cd2#code
+
+Try a signature demo:
+1. Visit https://proofolio.pages.dev/verify/2
+2. Upload the original file used at issuance → "원본 일치 ✅"
+3. Upload any other file → "해시 불일치 — 위변조 의심 ❌"
 
 ## Setup
 
