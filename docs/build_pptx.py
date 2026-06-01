@@ -13,7 +13,7 @@ Proofolio 발표 슬라이드 빌더 (.pptx).
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 # ─── 디자인 토큰 ────────────────────────────────────────────────
@@ -80,6 +80,44 @@ def hairline(slide, top, color=HAIRLINE):
     line.fill.fore_color.rgb = color
     line.line.fill.background()
     return line
+
+
+def placeholder(slide, left, top, width, height, label, sublabel=""):
+    """미디어(영상·이미지) 자리. Keynote에서 .mov/.png 드래그 시 이 박스가 교체됨."""
+    shape = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height
+    )
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = RGBColor(0xF1, 0xF3, 0xF7)
+    shape.line.color.rgb = HAIRLINE
+    shape.line.width = Pt(1)
+
+    tf = shape.text_frame
+    tf.word_wrap = True
+    tf.margin_left = tf.margin_right = Pt(20)
+    tf.margin_top = tf.margin_bottom = Pt(20)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
+    run = p.add_run()
+    run.text = label
+    run.font.size = Pt(18)
+    run.font.bold = True
+    run.font.color.rgb = INK_500
+    run.font.name = FONT
+
+    if sublabel:
+        p2 = tf.add_paragraph()
+        p2.alignment = PP_ALIGN.CENTER
+        p2.space_before = Pt(6)
+        r2 = p2.add_run()
+        r2.text = sublabel
+        r2.font.size = Pt(10)
+        r2.font.color.rgb = INK_500
+        r2.font.name = FONT
+
+    return shape
 
 
 def pill(slide, left, top, content, *, fg=ACCENT, bg_alpha=0xE9):
@@ -182,27 +220,71 @@ text(s, Inches(6.8), Inches(6.0), Inches(5.7), Inches(0.45),
      size=15, color=INK_950)
 
 
-# ─── Slide 4: Live Demo ───────────────────────────────────────
+# ─── Slide 4: Demo (영상 + 라이브 전환) ───────────────────────
 s = prs.slides.add_slide(BLANK)
 set_bg(s)
 eyebrow(s, Inches(0.6), "03 · Demo")
 
-text(s, Inches(0.8), Inches(2.6), Inches(12), Inches(2.4),
-     "LIVE\nDEMO.",
-     size=160, bold=True, color=INK_950, line_spacing=0.95)
+text(s, Inches(0.8), Inches(1.15), Inches(12), Inches(0.7),
+     "발급 영상 → 라이브 검증",
+     size=32, bold=True, color=INK_950, line_spacing=1.1)
 
-text(s, Inches(0.8), Inches(5.85), Inches(12), Inches(0.5),
-     "https://proofolio.pages.dev",
-     size=18, color=ACCENT)
-text(s, Inches(0.8), Inches(6.35), Inches(12), Inches(0.5),
-     "발급 → 검증 → 위변조 감지 (90초)",
-     size=14, color=INK_500)
+# 영상 placeholder — Keynote 열어서 .mov 파일을 이 박스로 드래그
+VIDEO_W = Inches(9)
+VIDEO_H = Inches(4.5)
+VIDEO_LEFT = Inches((13.333 - 9) / 2)  # 가운데 정렬
+VIDEO_TOP = Inches(2.2)
+placeholder(
+    s, VIDEO_LEFT, VIDEO_TOP, VIDEO_W, VIDEO_H,
+    "▶  발급 흐름 영상",
+    "이 자리에 .mov 파일을 드래그 (자동재생, 음소거, 15~20초)",
+)
+
+text(s, Inches(0.8), Inches(6.95), Inches(12), Inches(0.4),
+     "영상 자동재생 후 → 브라우저로 전환해 라이브 검증",
+     size=12, color=INK_500, align=PP_ALIGN.CENTER)
 
 
-# ─── Slide 5: Architecture & Engineering ──────────────────────
+# ─── Slide 5: 그 외 화면 (스샷 3장) ───────────────────────────
 s = prs.slides.add_slide(BLANK)
 set_bg(s)
-eyebrow(s, Inches(0.6), "04 · Architecture & Engineering")
+eyebrow(s, Inches(0.6), "04 · 그 외 화면")
+
+text(s, Inches(0.8), Inches(1.15), Inches(12), Inches(0.7),
+     "관리자 · 발급기관 · 보유자",
+     size=32, bold=True, color=INK_950, line_spacing=1.1)
+
+text(s, Inches(0.8), Inches(1.95), Inches(12), Inches(0.5),
+     "검증 외에도 다음 화면들이 같은 디자인 시스템으로 구현되어 있습니다.",
+     size=14, color=INK_700, line_spacing=1.4)
+
+# 스샷 placeholder 3개 — 가로 배치 (모든 위치 계산은 inch 단위로)
+SHOT_W_IN = 3.85
+SHOT_H_IN = 3.0
+SHOT_GAP_IN = 0.25
+SHOT_TOP_IN = 3.0
+shot_total_w_in = SHOT_W_IN * 3 + SHOT_GAP_IN * 2
+shot_left_start_in = (13.333 - shot_total_w_in) / 2
+
+screens = [
+    ("관리자 · /admin", "발급기관 등록 · 활성 관리"),
+    ("발급 · /issue", "보유자에게 증명서 발급"),
+    ("보유자 · /credentials", "받은 증명서 보기"),
+]
+for i, (label, sub) in enumerate(screens):
+    x_in = shot_left_start_in + (SHOT_W_IN + SHOT_GAP_IN) * i
+    placeholder(s, Inches(x_in), Inches(SHOT_TOP_IN),
+                Inches(SHOT_W_IN), Inches(SHOT_H_IN),
+                label, "스샷을 이 자리에 드래그")
+    text(s, Inches(x_in), Inches(SHOT_TOP_IN + SHOT_H_IN + 0.15),
+         Inches(SHOT_W_IN), Inches(0.4),
+         sub, size=11, color=INK_500, align=PP_ALIGN.CENTER, line_spacing=1.3)
+
+
+# ─── Slide 6: Architecture & Engineering ──────────────────────
+s = prs.slides.add_slide(BLANK)
+set_bg(s)
+eyebrow(s, Inches(0.6), "05 · Architecture & Engineering")
 
 text(s, Inches(0.8), Inches(1.2), Inches(12), Inches(1),
      "단순한 데모가 아닙니다.",
@@ -241,7 +323,7 @@ for p in points:
 # ─── Slide 6: Vibe coding & 마무리 ────────────────────────────
 s = prs.slides.add_slide(BLANK)
 set_bg(s)
-eyebrow(s, Inches(0.6), "05 · Vibe Coding · 노하우")
+eyebrow(s, Inches(0.6), "06 · Vibe Coding · 노하우")
 
 text(s, Inches(0.8), Inches(1.2), Inches(12), Inches(1),
      "AI로 어떻게 만들었나.",
