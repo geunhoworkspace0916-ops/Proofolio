@@ -220,71 +220,73 @@ text(s, Inches(6.8), Inches(6.0), Inches(5.7), Inches(0.45),
      size=15, color=INK_950)
 
 
-# ─── Slide 4: Demo (영상 + 라이브 전환) ───────────────────────
-s = prs.slides.add_slide(BLANK)
-set_bg(s)
-eyebrow(s, Inches(0.6), "03 · Demo")
+# ─── Slides 4–6: Demo (영상 3개) ──────────────────────────────
+def add_video_demo_slide(eyebrow_text, title, video_label, sublabel):
+    sl = prs.slides.add_slide(BLANK)
+    set_bg(sl)
+    eyebrow(sl, Inches(0.6), eyebrow_text)
+    text(sl, Inches(0.8), Inches(1.15), Inches(12), Inches(0.7),
+         title, size=30, bold=True, color=INK_950, line_spacing=1.1)
+    VW = Inches(9)
+    VH = Inches(4.5)
+    placeholder(
+        sl, Inches((13.333 - 9) / 2), Inches(2.2), VW, VH,
+        video_label, sublabel,
+    )
+    return sl
 
-text(s, Inches(0.8), Inches(1.15), Inches(12), Inches(0.7),
-     "발급 영상 → 라이브 검증",
-     size=32, bold=True, color=INK_950, line_spacing=1.1)
 
-# 영상 placeholder — Keynote 열어서 .mov 파일을 이 박스로 드래그
-VIDEO_W = Inches(9)
-VIDEO_H = Inches(4.5)
-VIDEO_LEFT = Inches((13.333 - 9) / 2)  # 가운데 정렬
-VIDEO_TOP = Inches(2.2)
-placeholder(
-    s, VIDEO_LEFT, VIDEO_TOP, VIDEO_W, VIDEO_H,
-    "▶  발급 흐름 영상",
-    "이 자리에 .mov 파일을 드래그 (자동재생, 음소거, 15~20초)",
+# Slide 4 — 영상 1: 발급기관 등록
+add_video_demo_slide(
+    "03 · Demo · ① 발급기관 등록",
+    "관리자가 새 발급기관을 등록합니다.",
+    "▶  영상 1",
+    "Admin이 발급기관 등록하는 .mov 드래그 · 자동재생 · 음소거",
 )
 
-text(s, Inches(0.8), Inches(6.95), Inches(12), Inches(0.4),
-     "영상 자동재생 후 → 브라우저로 전환해 라이브 검증",
-     size=12, color=INK_500, align=PP_ALIGN.CENTER)
+# Slide 5 — 영상 2: 증명서 발급
+add_video_demo_slide(
+    "03 · Demo · ② 증명서 발급",
+    "발급기관이 학생에게 증명서를 발급합니다.",
+    "▶  영상 2",
+    "지갑 주소·파일 입력 → 발급 .mov 드래그 · 자동재생 · 음소거",
+)
+
+# Slide 6 — 영상 3: 수령 + QR
+add_video_demo_slide(
+    "03 · Demo · ③ 수령 + QR",
+    "학생이 자기 증명서와 QR을 확인합니다.",
+    "▶  영상 3",
+    "보유자 로그인 → 내 증명서 + QR + 검증 페이지 이동 .mov 드래그",
+)
 
 
-# ─── Slide 5: 그 외 화면 (스샷 3장) ───────────────────────────
+# ─── Slide 7: 🔴 라이브 검증 (파일 대조) ──────────────────────
 s = prs.slides.add_slide(BLANK)
 set_bg(s)
-eyebrow(s, Inches(0.6), "04 · 그 외 화면")
+eyebrow(s, Inches(0.6), "03 · Demo · ④ 검증 (라이브)")
 
-text(s, Inches(0.8), Inches(1.15), Inches(12), Inches(0.7),
-     "관리자 · 발급기관 · 보유자",
-     size=32, bold=True, color=INK_950, line_spacing=1.1)
+text(s, Inches(0.8), Inches(2.2), Inches(12), Inches(2),
+     "원본 파일 대조 →\n위변조 즉시 감지.",
+     size=44, bold=True, color=INK_950, line_spacing=1.15)
 
-text(s, Inches(0.8), Inches(1.95), Inches(12), Inches(0.5),
-     "검증 외에도 다음 화면들이 같은 디자인 시스템으로 구현되어 있습니다.",
-     size=14, color=INK_700, line_spacing=1.4)
+text(s, Inches(0.8), Inches(5.1), Inches(12), Inches(0.6),
+     "✅ 원본 일치       ❌ 해시 불일치",
+     size=22, bold=True, color=ACCENT)
 
-# 스샷 placeholder 3개 — 가로 배치 (모든 위치 계산은 inch 단위로)
-SHOT_W_IN = 3.85
-SHOT_H_IN = 3.0
-SHOT_GAP_IN = 0.25
-SHOT_TOP_IN = 3.0
-shot_total_w_in = SHOT_W_IN * 3 + SHOT_GAP_IN * 2
-shot_left_start_in = (13.333 - shot_total_w_in) / 2
+text(s, Inches(0.8), Inches(5.95), Inches(12), Inches(0.5),
+     "브라우저 전환 → proofolio.pages.dev/verify/{ID}",
+     size=14, color=INK_500)
 
-screens = [
-    ("관리자 · /admin", "발급기관 등록 · 활성 관리"),
-    ("발급 · /issue", "보유자에게 증명서 발급"),
-    ("보유자 · /credentials", "받은 증명서 보기"),
-]
-for i, (label, sub) in enumerate(screens):
-    x_in = shot_left_start_in + (SHOT_W_IN + SHOT_GAP_IN) * i
-    placeholder(s, Inches(x_in), Inches(SHOT_TOP_IN),
-                Inches(SHOT_W_IN), Inches(SHOT_H_IN),
-                label, "스샷을 이 자리에 드래그")
-    text(s, Inches(x_in), Inches(SHOT_TOP_IN + SHOT_H_IN + 0.15),
-         Inches(SHOT_W_IN), Inches(0.4),
-         sub, size=11, color=INK_500, align=PP_ALIGN.CENTER, line_spacing=1.3)
+text(s, Inches(0.8), Inches(6.5), Inches(12), Inches(0.5),
+     "파일 A 업로드 → ✅    파일 B 업로드 → ❌    Etherscan 링크 확인",
+     size=12, color=INK_500)
 
 
 # ─── Slide 6: Architecture & Engineering ──────────────────────
 s = prs.slides.add_slide(BLANK)
 set_bg(s)
-eyebrow(s, Inches(0.6), "05 · Architecture & Engineering")
+eyebrow(s, Inches(0.6), "04 · Architecture & Engineering")
 
 text(s, Inches(0.8), Inches(1.2), Inches(12), Inches(1),
      "단순한 데모가 아닙니다.",
@@ -319,7 +321,7 @@ for p in points:
 # ─── Slide 6: Vibe coding & 마무리 ────────────────────────────
 s = prs.slides.add_slide(BLANK)
 set_bg(s)
-eyebrow(s, Inches(0.6), "06 · Vibe Coding · 노하우")
+eyebrow(s, Inches(0.6), "05 · Vibe Coding · 노하우")
 
 text(s, Inches(0.8), Inches(1.2), Inches(12), Inches(1),
      "AI로 어떻게 만들었나.",
