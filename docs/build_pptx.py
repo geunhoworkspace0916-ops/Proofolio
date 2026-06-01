@@ -290,28 +290,24 @@ text(s, Inches(0.8), Inches(1.2), Inches(12), Inches(1),
      "단순한 데모가 아닙니다.",
      size=36, bold=True, color=INK_950, line_spacing=1.1)
 
-# 아키텍처 다이어그램 (모노폰트 텍스트)
+# 다이어그램 — 3단계 흐름, 평이한 한국어만
 arch_lines = [
-    "[발급기관 지갑]  ─ issueCredential ─▶  [Proofolio · Sepolia]",
-    "                                                │",
-    "                                                ▼",
-    "                                       [소울바운드 ERC-721]",
-    "                                          (보유자 지갑)",
-    "                                                │",
-    "          (지갑 없이) ◀─ verify(tokenId) + keccak256 ─┘",
-    "                       검증자가 직접 RPC 호출",
+    "발급기관    →    블록체인에 영구 기록    →    보유자 지갑",
+    "",
+    "                              ↑",
+    "             검증자가 지갑 없이도 누구나 진위 확인",
 ]
-text(s, Inches(0.8), Inches(2.55), Inches(12), Inches(2.6),
+text(s, Inches(0.8), Inches(2.7), Inches(12), Inches(2.4),
      "\n".join(arch_lines),
-     size=12, color=INK_700, font=FONT_MONO, line_spacing=1.35)
+     size=17, color=INK_700, line_spacing=1.6, align=PP_ALIGN.CENTER)
 
 hairline(s, Inches(5.35))
 
 points = [
-    "ERC-721 + Ownable2Step + 소울바운드 (_update mint-only)",
-    "Hardhat 단위 테스트 17개 — 정상·엣지·보안",
-    "Etherscan ✅ Verified — 누구나 소스코드 확인 가능",
-    "한계: 발급 사실만 보장. 기관 정당성은 별도 신뢰 앵커.",
+    "증명서는 양도가 불가능한 형태로 발급 — 사고팔 수 없음",
+    "자동 테스트 17개로 정상 · 비정상 · 공격 시나리오까지 검증",
+    "코드를 Etherscan에 공개 — 저희를 안 믿어도 코드는 검증 가능",
+    "한 가지 한계 — '기관이 발급했다'는 보장하지만 '기관이 좋은가'는 별도 검토",
 ]
 y = Inches(5.6)
 for p in points:
