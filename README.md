@@ -3,9 +3,9 @@
 학력·수료증 같은 증명서를 블록체인에 발급해, **누구나 지갑 없이 진위를 검증**할 수 있는 dApp입니다.
 파일이 한 글자만 바뀌어도 위조로 잡아내고, "어느 기관이 발급했는지"까지 확인할 수 있습니다.
 
-🔗 **데모:** https://proofolio.pages.dev
-📜 **검증된 컨트랙트(Etherscan):** https://sepolia.etherscan.io/address/0x84b5e7F9BB2C87912528D4f63D9D9A7257475Cd2#code
-📑 **발표 자료:** [Proofolio_presentation.pptx](docs/Proofolio_presentation.pptx)
+- 🔗 **데모** — https://proofolio.pages.dev
+- 📜 **검증된 컨트랙트** — [Sepolia Etherscan에서 보기](https://sepolia.etherscan.io/address/0x84b5e7F9BB2C87912528D4f63D9D9A7257475Cd2#code)
+- 📑 **발표 자료** — [Proofolio_presentation.pptx](docs/Proofolio_presentation.pptx)
 
 ### 위변조 탐지 예시
 
