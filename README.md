@@ -5,8 +5,13 @@
 
 🔗 **데모:** https://proofolio.pages.dev
 📜 **검증된 컨트랙트(Etherscan):** https://sepolia.etherscan.io/address/0x84b5e7F9BB2C87912528D4f63D9D9A7257475Cd2#code
+📑 **발표 자료:** [Proofolio_presentation.pptx](docs/Proofolio_presentation.pptx)
 
-> _스크린샷 / 데모 GIF 위치 — 실제 발급·검증 화면을 캡처해 여기에 넣으면 좋습니다._
+### 위변조 탐지 예시
+
+| 원본 파일 업로드 → **일치 ✅** | 변조된 파일 업로드 → **위변조 ❌** |
+|:---:|:---:|
+| ![원본 파일](docs/demo-original.png) | ![변조 파일](docs/demo-tampered.png) |
 
 ---
 
